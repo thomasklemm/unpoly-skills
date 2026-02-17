@@ -13,6 +13,7 @@
 - [Cache control](#cache-control)
 - [Conditional GET (polling/reload)](#conditional-get-pollingreload)
 - [CSP-safe callbacks](#csp-safe-callbacks)
+- [Common Rails patterns](#common-rails-patterns)
 - [Vary headers](#vary-headers)
 - [Failed form submissions](#failed-form-submissions)
 
@@ -369,3 +370,118 @@ in the form fragment.
 - **Redirect preservation** — `redirect_to` preserves Unpoly request/response headers across redirects
 - **`X-Up-Location` echo** — Each response includes the request URL, so Unpoly detects redirects
 - **`_up_method` cookie** — Lets Unpoly detect the HTTP method of the initial page load
+
+---
+
+## Common Rails patterns
+
+### DRY validate + save across create and update
+
+Extract a private method that handles `up.validate?`, save, and render in one place,
+shared between `create` and `update`:
+
+```ruby
+class CompaniesController < ApplicationController
+  def create
+    build_company
+    save_company(form: 'new')
+  end
+
+  def update
+    load_company
+    build_company
+    save_company(form: 'edit')
+  end
+
+  private
+
+  def save_company(form:)
+    if up.validate?
+      @company.valid?              # run validations, don't save
+      render form                  # re-render form with errors
+    elsif @company.save
+      redirect_to @company, notice: 'Company saved'
+    else
+      render form, status: :unprocessable_entity
+    end
+  end
+end
+```
+
+### Overlay auto-close via `up-accept-location` with Rails path helpers
+
+Use `path_helper('$id')` as a URL pattern for `[up-accept-location]`. Unpoly treats `$id`
+as a wildcard, so the overlay closes automatically when the browser lands on any matching URL
+after a normal `redirect_to` — no `up.layer.accept` needed in the controller.
+
+```erb
+<%= link_to 'New company', new_company_path,
+  'up-layer': 'new',
+  'up-accept-location': company_path('$id'),
+  'up-on-accepted': "up.reload('#companies')" %>
+```
+
+`company_path('$id')` generates `/companies/$id`. After `redirect_to @company`, Unpoly sees
+the URL `/companies/42` matches the pattern and closes the overlay.
+
+### Server-side event triggers overlay dismissal
+
+Emit an event from the controller after a destructive action. Any open overlay watching
+for that event with `[up-dismiss-event]` automatically closes.
+
+Controller:
+```ruby
+def destroy
+  @company.destroy
+  up.layer.emit('company:destroyed')
+  redirect_to companies_path
+end
+```
+
+View (on the opener page):
+```erb
+<%= link_to company.name, company,
+  'up-layer': 'new',
+  'up-dismiss-event': 'company:destroyed',
+  'up-on-dismissed': "up.reload('#companies')" %>
+```
+
+When the company is destroyed in any layer, the overlay watching for `company:destroyed`
+closes and the list reloads — without the controller needing to know which overlays are open.
+
+### Passing context to overlays from views
+
+Use `.to_json` to pass a context hash to a new overlay:
+
+```erb
+<%= link_to 'Add project', new_project_path,
+  'up-layer': 'new',
+  'up-accept-location': project_path('$id'),
+  'up-context': { from_company: true }.to_json %>
+```
+
+The overlay's layer context is then accessible on the server:
+
+```ruby
+up.context[:from_company]  # => true
+```
+
+Use this to adjust responses based on where an overlay was opened from.
+
+### Guard ApplicationController callbacks with `up?`
+
+Only run server-side side effects that are specific to Unpoly fragment requests:
+
+```ruby
+class ApplicationController < ActionController::Base
+  after_action :set_cache_headers
+
+  private
+
+  def set_cache_headers
+    if up?
+      response.headers['Cache-Control'] = 'no-store'
+    end
+  end
+end
+```
