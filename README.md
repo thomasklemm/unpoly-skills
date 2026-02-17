@@ -1,10 +1,30 @@
 # unpoly-skills
 
-A [Claude Code](https://claude.ai/claude-code) skill for working with [Unpoly](https://unpoly.com/) — the progressive enhancement framework for server-rendered HTML.
+An [Agent Skill](https://agentskills.io) for working with [Unpoly](https://unpoly.com/) — the progressive enhancement framework for server-rendered HTML. Works with Claude Code, OpenAI Codex, OpenCode, Cursor, and [35+ more agents](https://github.com/vercel-labs/skills#supported-agents).
+
+## Install
+
+```bash
+npx skills add thomasklemm/unpoly-skills
+```
+
+This auto-detects your coding agent and installs the skill in the right place. Supports Claude Code, Codex, Cursor, OpenCode, Amp, and more.
+
+**Install globally** (available in all projects):
+
+```bash
+npx skills add thomasklemm/unpoly-skills --global
+```
+
+**Install for a specific agent:**
+
+```bash
+npx skills add thomasklemm/unpoly-skills --agent claude-code
+```
 
 ## What it does
 
-Gives Claude deep knowledge of Unpoly so it can help you build, debug, and extend Unpoly-powered apps. Covers:
+Gives your AI agent deep knowledge of Unpoly so it can help you build, debug, and extend Unpoly-powered apps. Covers:
 
 - **Fragment updates** — targeting, rendering options, `:main`, `:maybe`, `[up-hungry]`, `[up-keep]`
 - **Forms** — submission, `[up-validate]`, reactive forms with `[up-watch]` and `[up-autosubmit]`
@@ -15,17 +35,9 @@ Gives Claude deep knowledge of Unpoly so it can help you build, debug, and exten
 - **Navigation** — history, scroll restoration, focus management, URL patterns
 - **Lifecycle & server** — render lifecycle events, controlling rendering, full HTTP header reference
 
-## Install
-
-Download [`unpoly.skill`](./unpoly.skill) and install it:
-
-```bash
-claude skill install unpoly.skill
-```
-
 ## Usage
 
-Once installed, Claude will automatically use this skill when you ask Unpoly questions:
+Once installed, your agent will automatically use this skill when you ask Unpoly questions:
 
 > "How do I open a form in a modal drawer and reload the parent page when it's accepted?"
 
