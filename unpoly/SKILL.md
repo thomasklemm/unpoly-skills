@@ -4,7 +4,7 @@ description: >
   Comprehensive guide for building server-rendered apps with Unpoly — a progressive
   enhancement framework that adds SPA-like behavior through HTML attributes.
   Use when working with Unpoly fragment updates, overlays/layers, forms, compilers,
-  caching, lazy loading, animations, polling, the render lifecycle, or server integration.
+  caching, lazy loading, animations, transitions, error handling, polling, the render lifecycle, or server integration.
   Covers [up-follow], [up-target], [up-layer], [up-submit], [up-validate], up.compiler(),
   up.render(), up.layer.open(), caching, previews, optimistic rendering, and more.
 ---
@@ -87,5 +87,7 @@ Load these when the user's question covers that topic:
 - **[performance.md](references/performance.md)** — Caching, revalidation, lazy loading (`[up-defer]`), preloading, optimizing server responses, polling (`[up-poll]`)
 - **[loading-state.md](references/loading-state.md)** — CSS loading classes, placeholders, previews, optimistic rendering, disabling forms, progress bar, offline handling
 - **[compilers.md](references/compilers.md)** — Registering compilers, destructors, passing data, macros, `up.hello()`, integrating JS libraries, context
-- **[navigation.md](references/navigation.md)** — History, scroll restoration, focus management, URL patterns, updating history from server
+- **[navigation.md](references/navigation.md)** — Navigation vs rendering, `.up-current` active links, history, scroll restoration, focus management, URL patterns
+- **[animations.md](references/animations.md)** — Built-in animations/transitions, custom animations, duration/easing, disabling animation
+- **[error-handling.md](references/error-handling.md)** — Failed responses, `[up-fail-target]`, skipping rendering, conditional requests (ETags), network errors, flash messages
 - **[lifecycle.md](references/lifecycle.md)** — Render lifecycle events, controlling rendering, error handling, server integration headers

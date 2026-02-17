@@ -1,11 +1,75 @@
 # Navigation
 
 ## Table of contents
+- [Navigation vs rendering](#navigation-vs-rendering)
+- [Active nav links (up-current)](#active-nav-links-up-current)
 - [History management](#history-management)
 - [Scrolling](#scrolling)
 - [Focus management](#focus-management)
 - [URL patterns](#url-patterns)
 - [Restoring history](#restoring-history)
+
+---
+
+## Navigation vs rendering
+
+**Navigation** is a render pass that also updates the browser history, scroll position, and focus.
+Links and form submissions **navigate** by default. `up.render()` from JS does **not** navigate by default.
+
+Key navigation defaults (applied automatically when navigating):
+- History is updated (`{ history: true }`)
+- Cache is used (`{ cache: 'auto' }`)
+- Fallback to main if target missing (`{ fallback: true }`)
+- Scroll position restored on back/forward
+
+Use `up.navigate()` to trigger a full navigation from JS:
+```js
+up.navigate({ url: '/users' })       // navigates (updates history, scroll, etc.)
+up.render({ url: '/users' })         // just renders, no history update
+up.render({ url: '/users', navigate: true })  // opt into navigation behavior
+```
+
+Configure navigation defaults:
+```js
+up.fragment.config.navigateOptions.cache = false   // disable cache for navigation
+up.fragment.config.navigateOptions.history = false // disable history for navigation
+```
+
+---
+
+## Active nav links (up-current)
+
+Unpoly automatically adds `.up-current` to links whose `[href]` matches the current browser URL:
+
+```html
+<nav>
+  <a href="/dashboard">Dashboard</a>  <!-- gets .up-current when at /dashboard -->
+  <a href="/users">Users</a>
+</nav>
+```
+
+Style active links with CSS:
+```css
+nav a.up-current {
+  font-weight: bold;
+  color: var(--accent);
+}
+```
+
+`.up-current` is updated after every fragment update that changes the URL — no JS needed.
+
+**Per-layer:** links in an overlay track the overlay's URL, not the root URL.
+
+**Aliases** — mark a link as current for additional URLs:
+```html
+<a href="/users" up-alias="/users/*">Users</a>
+<!-- Active for /users, /users/1, /users/new, etc. -->
+```
+
+**Configure the current class:**
+```js
+up.history.config.currentClasses = ['active', 'up-current']
+```
 
 ---
 

@@ -8,6 +8,8 @@
 - [Optional and hungry targets](#optional-and-hungry-targets)
 - [Keeping elements across updates](#keeping-elements-across-updates)
 - [Handling all links and forms](#handling-all-links-and-forms)
+- [Faux interactive elements](#faux-interactive-elements)
+- [Emitting events from HTML](#emitting-events-from-html)
 - [up.render() options](#uprender-options)
 
 ---
@@ -142,6 +144,47 @@ Or use `[up-dash]` as a shorthand that sets `[up-follow]`, `[up-target]`, `[up-t
 // application.js
 up.link.config.followSelectors.push('a[href]')
 up.form.config.submitSelectors.push('form')
+```
+
+---
+
+## Faux interactive elements
+
+Use `[up-follow]` with `[up-href]` to make any non-interactive element behave like a link:
+
+```html
+<span up-follow up-href="/details">Read more</span>
+<div class="card" up-follow up-href="/cards/5" up-target=".content">...</div>
+```
+
+The element gets proper keyboard navigation and ARIA roles automatically.
+Prefer real `<a>` tags when possible — they work without JS, support new-tab, and are indexed by crawlers.
+
+**`[up-clickable]`** — make an element keyboard-navigable without following a link:
+```html
+<div up-clickable>...</div>
+```
+
+---
+
+## Emitting events from HTML
+
+Emit a custom DOM event when an element is clicked, without writing JS:
+
+```html
+<button up-emit="user:activate" up-emit-props='{ "id": 5 }'>Activate</button>
+```
+
+The event bubbles up the DOM and can be handled by a compiler or listener:
+```js
+up.on('user:activate', function(event) {
+  console.log('Activating user', event.id)
+})
+```
+
+Combine with `[up-follow]` to also navigate after emitting:
+```html
+<a href="/users/5" up-follow up-emit="user:selected">Select user</a>
 ```
 
 ---

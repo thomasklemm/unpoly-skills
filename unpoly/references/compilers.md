@@ -246,6 +246,39 @@ up.layer.current.context.key = 'value'
 
 ---
 
+## Analytics
+
+Track page views and fragment updates without double-counting on cache revalidation.
+
+**Track navigation (address bar changes):**
+```js
+up.on('up:location:changed', function(event) {
+  analytics.trackPageView(event.location)
+})
+```
+
+**Avoid double-counting on revalidation** — Unpoly revalidates stale cache entries silently.
+Use `meta.revalidating` to skip analytics on revalidation passes:
+
+```js
+up.compiler('main', function(element, data, meta) {
+  if (!meta.revalidating) {
+    analytics.trackPageView(up.history.location)
+  }
+})
+```
+
+**Track major fragment updates (JS):**
+```js
+up.on('up:fragment:inserted', function(event) {
+  if (!event.revalidating) {
+    analytics.trackEvent('fragment:inserted', { target: event.target })
+  }
+})
+```
+
+---
+
 ## Legacy scripts
 
 If you have legacy `$(document).ready()` or `DOMContentLoaded` handlers,
