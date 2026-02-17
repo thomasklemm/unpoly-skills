@@ -272,20 +272,20 @@ they emit an `error` event on `window` and the render succeeds.
 
 ```ruby
 # Check if Unpoly request
-if up?                         # Alias: up.requested_with_unpoly?
+up?                                     # true/false
 
 # Target info
-up.target                      # Target selector string
-up.target?('.content')        # Does target match?
-up.layer.mode                 # 'root', 'modal', 'drawer', etc.
+up.target                               # Target selector string
+up.target?('.content')                 # Does target match?
+up.layer.mode                          # 'root', 'modal', 'drawer', etc.
 up.layer.root?
 up.layer.overlay?
-up.layer.context               # Hash of layer context
-up.validate?                   # Is this a validation request?
-up.validate.name               # Name of field being validated
+up.layer.context                        # Hash of layer context
+up.validate?                            # Is this a validation request?
+up.validate_names                       # Array of field names being validated
 
 # Render helpers
 up.emit('user:created', id: @user.id)  # Emit event header
-up.accept_layer(@user)                  # Accept overlay with value
-up.dismiss_layer                        # Dismiss overlay
+up.layer.accept(@user)                  # Accept overlay with value
+up.layer.dismiss                        # Dismiss overlay
 ```

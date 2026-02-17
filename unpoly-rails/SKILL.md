@@ -1,12 +1,12 @@
 ---
 name: unpoly-rails
 description: >
-  Ruby on Rails server-side integration for Unpoly. Use when working with the unpoly-rails gem,
-  including server-side helpers for inspecting Unpoly requests, controlling fragment rendering,
-  managing overlays from the server, emitting frontend events, handling form validation,
-  controlling the client-side cache, reading/writing layer context, and CSP-safe callbacks.
-  Covers up?, up.target, up.layer.accept, up.layer.dismiss, up.layer.open, up.validate?,
-  up.cache.expire, up.context, up.emit, up.safe_callback, fresh_when, and render_nothing.
+  Ruby on Rails integration for Unpoly. Use when working with the unpoly-rails gem or building
+  Unpoly-powered Rails apps. Covers server-side helpers (up?, up.target, up.layer.accept,
+  up.layer.dismiss, up.layer.open, up.validate?, up.cache.expire, up.context, up.emit,
+  up.safe_callback, fresh_when, render_nothing), Rails view helpers (link_to, form_with,
+  button_to with Unpoly attributes), flash messages with [up-hungry], Turbo coexistence
+  (disabling Turbo Drive in Rails 7+), CSP setup with csp_meta_tag, and global follow-all config.
 ---
 
 # Unpoly Rails

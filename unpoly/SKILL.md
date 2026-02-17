@@ -46,6 +46,8 @@ the smart patching, caching, overlays, and lifecycle.
 | `[up-transition]` | CSS animation between old and new content |
 | `[up-switch]` | Show/hide/enable/disable elements based on field value |
 | `[up-disable]` | Disable fields/buttons during request |
+| `[up-confirm]` | Show confirmation dialog before following |
+| `[up-content]` | Open overlay from inline HTML (no request) |
 
 ## Quick reference: key JS functions
 
@@ -77,6 +79,7 @@ up.cache.evict()                                  // Clear all cache entries
 | `X-Up-Dismiss-Layer: value` | Dismiss overlay from server |
 | `X-Up-Open-Layer: {}` | Force-open overlay from server |
 | `X-Up-Events: [...]` | Emit events on the frontend |
+| `X-Up-Context: {}` | Merge JSON into current layer context |
 | `X-Up-Location` | Override the URL pushed to history |
 
 ## Reference files

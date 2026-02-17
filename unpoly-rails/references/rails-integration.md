@@ -2,6 +2,7 @@
 
 ## Table of contents
 - [View helper syntax](#view-helper-syntax)
+- [Flash messages](#flash-messages)
 - [Turbo coexistence](#turbo-coexistence)
 - [CSP setup](#csp-setup)
 - [Global follow-all config](#global-follow-all-config)
@@ -115,6 +116,49 @@ Rails' `data:` hash renders as `data-*` attributes. Never use it for Unpoly:
 
 <%# Correct — string keys render as up-follow="up-follow" %>
 <%= link_to 'Users', users_path, 'up-follow': true %>
+```
+
+---
+
+## Flash messages
+
+With fragment updates, the full page isn't reloaded, so flash messages rendered in the
+layout won't appear unless their fragment is also updated. The standard Rails pattern is
+to put flash in its own partial with `[up-hungry]`, which tells Unpoly to update it
+whenever it appears in any response — regardless of what fragment was targeted.
+
+**Layout:**
+```erb
+<%# app/views/layouts/application.html.erb %>
+<%= render 'shared/flash' %>
+```
+
+**Partial (`app/views/shared/_flash.html.erb`):**
+```erb
+<div id="flash" up-hungry>
+  <% flash.each do |type, message| %>
+    <div class="alert alert-<%= type %>"><%= message %></div>
+  <% end %>
+</div>
+```
+
+Because the partial has `[up-hungry]`, Unpoly updates `#flash` on every response that
+includes it — including fragment responses that target something else entirely.
+
+To include the flash partial in fragment responses without rendering a full layout, render
+it alongside your main content. Rails does this automatically when using `respond_to` or
+the layout is rendered as part of the fragment. Alternatively, include the flash in your
+`:main` target or any frequently-updated fragment.
+
+**Controller flash works normally — no changes needed:**
+```ruby
+def create
+  if @post.save
+    redirect_to @post, notice: 'Post created'  # flash[:notice] works as usual
+  else
+    render :new, status: :unprocessable_entity
+  end
+end
 ```
 
 ---

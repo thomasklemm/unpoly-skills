@@ -91,6 +91,9 @@ npx skills add thomasklemm/unpoly-skills/unpoly-rails --global
 - **Context** — `up.context` read/write/delete
 - **CSP callbacks** — `up.safe_callback`
 - **Conditional GET** — `fresh_when`, `stale?` with Unpoly polling
+- **Rails view helpers** — `link_to`, `form_with`, `button_to` with Unpoly attributes; `html:` and `form:` option gotchas
+- **Flash messages** — `[up-hungry]` pattern for flash that updates on every fragment response
+- **Turbo coexistence** — disabling Turbo Drive in Rails 7+ apps
 
 ### Example prompts
 
@@ -108,7 +111,8 @@ npx skills add thomasklemm/unpoly-skills/unpoly-rails --global
 unpoly-rails/
 ├── SKILL.md                    # Overview, installation, quick-reference table
 └── references/
-    └── server-helpers.md       # Full API reference for all server-side helpers
+    ├── server-helpers.md       # Full API reference for all server-side helpers
+    └── rails-integration.md   # View helpers, flash messages, Turbo, CSP, global config
 ```
 
 ---
