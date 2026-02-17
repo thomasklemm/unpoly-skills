@@ -26,8 +26,8 @@ reactive forms, lazy loading, animations, and more to any server-rendered app.
 ### Install
 
 ```bash
-npx skills add thomasklemm/unpoly-skills --skill unpoly          # this project only
-npx skills add thomasklemm/unpoly-skills --skill unpoly -g       # all projects
+npx skills add thomasklemm/unpoly-skills --skill unpoly           # current project only
+npx skills add thomasklemm/unpoly-skills --skill unpoly --global  # all projects
 ```
 
 ### What it covers
@@ -82,8 +82,8 @@ flash messages, Turbo coexistence, and more.
 ### Install
 
 ```bash
-npx skills add thomasklemm/unpoly-skills --skill unpoly-rails          # this project only
-npx skills add thomasklemm/unpoly-skills --skill unpoly-rails -g       # all projects
+npx skills add thomasklemm/unpoly-skills --skill unpoly-rails           # current project only
+npx skills add thomasklemm/unpoly-skills --skill unpoly-rails --global  # all projects
 ```
 
 ### What it covers
