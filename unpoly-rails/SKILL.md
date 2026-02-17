@@ -75,4 +75,5 @@ import 'unpoly/unpoly.css'
 
 Load when the user's question covers that topic:
 
-- **[server-helpers.md](references/server-helpers.md)** — Full API reference: request inspection, response control, layer API, validation, events, cache control, context, CSP callbacks, failed forms, Vary headers, conditional GETs
+- **[server-helpers.md](references/server-helpers.md)** — Full API reference: request inspection, response control, layer API, validation, events, cache control, context, CSP callbacks, failed forms, Vary headers, conditional GETs, common Rails patterns
+- **[rails-integration.md](references/rails-integration.md)** — View helper syntax (`link_to`, `form_with`, `button_to`, field helpers), Turbo coexistence (disabling Turbo Drive in Rails 7+), CSP setup with `csp_meta_tag`, global follow-all config
