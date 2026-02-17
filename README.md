@@ -1,12 +1,23 @@
 # unpoly-skills
 
-[Agent Skills](https://agentskills.io) for working with [Unpoly](https://unpoly.com/) — the progressive enhancement framework for server-rendered HTML. Works with Claude Code, OpenAI Codex, OpenCode, Cursor, and [35+ more agents](https://github.com/vercel-labs/skills#supported-agents).
+Give your AI coding agent deep knowledge of [Unpoly](https://unpoly.com/) — the progressive
+enhancement framework that makes server-rendered apps feel like SPAs without the complexity.
+
+Two skills, install either or both:
+
+| Skill | What it's for |
+|-------|--------------|
+| [`unpoly`](#unpoly--frontend) | Fragment updates, overlays, forms, compilers, caching, animations |
+| [`unpoly-rails`](#unpoly-rails--ruby-on-rails) | Server-side gem helpers, Rails view syntax, Turbo coexistence |
+
+Works with Claude Code, Cursor, OpenAI Codex, OpenCode, Amp, and [35+ more agents](https://github.com/vercel-labs/skills#supported-agents).
 
 ---
 
-## `unpoly` — Frontend skill
+## `unpoly` — Frontend
 
-Covers Unpoly fragment updates, overlays, forms, compilers, caching, animations, and more.
+Covers the full Unpoly frontend API so your agent can add fragment updates, overlays,
+reactive forms, lazy loading, animations, and more to any server-rendered app.
 
 ### Install
 
@@ -14,10 +25,8 @@ Covers Unpoly fragment updates, overlays, forms, compilers, caching, animations,
 npx skills add thomasklemm/unpoly-skills/unpoly
 ```
 
-**Install globally** (available in all projects):
-
 ```bash
-npx skills add thomasklemm/unpoly-skills/unpoly --global
+npx skills add thomasklemm/unpoly-skills/unpoly --global  # available in all projects
 ```
 
 ### What it covers
@@ -63,10 +72,11 @@ unpoly/
 
 ---
 
-## `unpoly-rails` — Ruby on Rails server-side integration
+## `unpoly-rails` — Ruby on Rails
 
-Covers the `unpoly-rails` gem: server-side helpers for inspecting Unpoly requests, controlling
-rendering, managing overlays, emitting events, and more.
+Covers the [`unpoly-rails`](https://github.com/unpoly/unpoly-rails) gem and everything
+specific to using Unpoly in a Rails app: server-side request helpers, Rails view syntax,
+flash messages, Turbo coexistence, and more.
 
 ### Install
 
@@ -74,10 +84,8 @@ rendering, managing overlays, emitting events, and more.
 npx skills add thomasklemm/unpoly-skills/unpoly-rails
 ```
 
-**Install globally:**
-
 ```bash
-npx skills add thomasklemm/unpoly-skills/unpoly-rails --global
+npx skills add thomasklemm/unpoly-skills/unpoly-rails --global  # available in all projects
 ```
 
 ### What it covers
@@ -103,7 +111,7 @@ npx skills add thomasklemm/unpoly-skills/unpoly-rails --global
 
 > "How do I expire the Unpoly cache after a background job updates data?"
 
-> "How do I emit a frontend event from a Rails action?"
+> "How do I use `button_to` with `up-confirm` for a delete action?"
 
 ### Contents
 
