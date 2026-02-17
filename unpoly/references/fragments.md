@@ -7,6 +7,7 @@
 - [Multiple fragments](#multiple-fragments)
 - [Optional and hungry targets](#optional-and-hungry-targets)
 - [Keeping elements across updates](#keeping-elements-across-updates)
+- [Client-side templates](#client-side-templates)
 - [Handling all links and forms](#handling-all-links-and-forms)
 - [Faux interactive elements](#faux-interactive-elements)
 - [Emitting events from HTML](#emitting-events-from-html)
@@ -109,6 +110,46 @@ Match is by element type + `[id]` by default. Customize with `[up-keep="..."]` C
   <h3>Title</h3>
   <a href="/cards/5">Read more</a> <!-- This link's href/attributes are used -->
 </div>
+```
+
+---
+
+## Client-side templates
+
+Use `<template>` elements to render HTML fragments without a server request.
+Useful for placeholders, small overlays, or optimistic rendering.
+
+```html
+<!-- Reference a template by ID -->
+<a up-fragment="#my-template">Click me</a>
+
+<template id="my-template">
+  <div class="target">New content</div>
+</template>
+```
+
+Templates also work with `[up-content]`, `[up-document]`, and `[up-placeholder]` attributes:
+```html
+<!-- Open overlay with local template (no request) -->
+<a up-layer="new modal" up-document="#help-template">Help</a>
+
+<template id="help-template">
+  <div class="content"><p>Help text</p></div>
+</template>
+```
+
+Pass data to a template via `[up-use-data]` (available in compilers as `data`):
+```html
+<a up-fragment="#task-template" up-use-data='{ "description": "Buy toast" }'>Add task</a>
+
+<template id="task-template">
+  <div class="task"><!-- compiler fills description --></div>
+</template>
+```
+
+From JS:
+```js
+up.render({ target: '.content', fragment: '#my-template' })
 ```
 
 ---

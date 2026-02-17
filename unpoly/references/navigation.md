@@ -7,6 +7,7 @@
 - [Scrolling](#scrolling)
 - [Focus management](#focus-management)
 - [URL patterns](#url-patterns)
+- [Back links and instant navigation](#back-links-and-instant-navigation)
 - [Restoring history](#restoring-history)
 
 ---
@@ -244,6 +245,28 @@ let pattern = new up.URLPattern('/users/:id')
 pattern.test('/users/5')      // true
 pattern.test('/users')        // false
 pattern.recognize('/users/5') // { id: '5' }
+```
+
+---
+
+## Back links and instant navigation
+
+**`[up-back]`** — a link that navigates to the previous URL (not a browser `history.back()`):
+```html
+<a href="/default" up-back>Go back</a>
+<!-- Transformed to: <a href="/previous-page" up-follow up-scroll="restore"> -->
+```
+
+If no previous URL is known, the link falls back to the `[href]` value.
+
+**`[up-instant]`** — follow a link on mousedown instead of click (faster perceived response):
+```html
+<a href="/users" up-follow up-instant>Users</a>
+```
+
+Configure globally:
+```js
+up.link.config.instantSelectors.push('a[href]')
 ```
 
 ---

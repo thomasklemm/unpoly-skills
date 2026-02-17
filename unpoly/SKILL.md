@@ -39,10 +39,12 @@ the smart patching, caching, overlays, and lifecycle.
 | `[up-hungry]` | Optionally update element whenever it appears in any response |
 | `[up-preload]` | Preload link on hover |
 | `[up-instant]` | Follow link on mousedown, not click |
+| `[up-back]` | Navigate to previous URL |
 | `[up-defer]` | Lazy-load a fragment |
 | `[up-poll]` | Periodically reload a fragment |
 | `[up-keep]` | Preserve element across fragment updates |
 | `[up-transition]` | CSS animation between old and new content |
+| `[up-switch]` | Show/hide/enable/disable elements based on field value |
 | `[up-disable]` | Disable fields/buttons during request |
 
 ## Quick reference: key JS functions
@@ -81,8 +83,8 @@ up.cache.evict()                                  // Clear all cache entries
 
 Load these when the user's question covers that topic:
 
-- **[fragments.md](references/fragments.md)** — Targeting, rendering options, handling all links/forms, `:main`, `:layer`, `:maybe`, `[up-hungry]`, `[up-keep]`, `[up-expand]`, `up.render()` options
-- **[forms.md](references/forms.md)** — Form submission, validation (`[up-validate]`), reactive forms (`[up-watch]`, `[up-autosubmit]`), watch options, disabling forms
+- **[fragments.md](references/fragments.md)** — Targeting, rendering options, client-side templates, handling all links/forms, `:main`, `:layer`, `:maybe`, `[up-hungry]`, `[up-keep]`, `[up-expand]`, `up.render()` options
+- **[forms.md](references/forms.md)** — Form submission, validation (`[up-validate]`), reactive forms (`[up-watch]`, `[up-autosubmit]`), form state switching (`[up-switch]`), watch options, disabling forms
 - **[layers.md](references/layers.md)** — Opening overlays, layer modes, subinteractions, close conditions, accepting/dismissing layers, layer context, targeting layers
 - **[performance.md](references/performance.md)** — Caching, revalidation, lazy loading (`[up-defer]`), preloading, optimizing server responses, polling (`[up-poll]`)
 - **[loading-state.md](references/loading-state.md)** — CSS loading classes, placeholders, previews, optimistic rendering, disabling forms, progress bar, offline handling

@@ -6,6 +6,7 @@
 - [Validating fields on change (up-validate)](#validating-fields-on-change-up-validate)
 - [Reactive forms (up-watch, up-autosubmit)](#reactive-forms-up-watch-up-autosubmit)
 - [Watch options](#watch-options)
+- [Switching form state (up-switch)](#switching-form-state-up-switch)
 - [Disabling forms during submission](#disabling-forms-during-submission)
 - [Multi-step forms in overlays](#multi-step-forms-in-overlays)
 
@@ -187,6 +188,48 @@ Attach to specific field to submit on that field's change only:
 From JS:
 ```js
 up.watch('input[name=search]', { delay: 300, event: 'input' }, handler)
+```
+
+---
+
+## Switching form state (up-switch)
+
+`[up-switch]` controls show/hide/enable/disable of other elements based on a field's value.
+This is for **client-side** light effects — use `[up-watch]` for server-rendered changes.
+
+**Show/hide elements:**
+```html
+<select name="level" up-switch=".level-dependent">
+  <option value="beginner">Beginner</option>
+  <option value="expert">Expert</option>
+</select>
+
+<div class="level-dependent" up-show-for="beginner">Shown for beginners only</div>
+<div class="level-dependent" up-hide-for="beginner">Hidden for beginners</div>
+<div class="level-dependent" up-show-for="intermediate expert">Multiple values</div>
+```
+
+**Enable/disable fields:**
+```html
+<select name="role" up-switch=".role-dependent">
+  <option value="trainee">Trainee</option>
+  <option value="manager">Manager</option>
+</select>
+
+<input class="role-dependent" name="department" up-enable-for="manager">
+<input class="role-dependent" name="mentor" up-disable-for="manager">
+```
+
+**Special values:**
+- `:blank` / `:present` — react to empty or non-empty values
+- `:checked` / `:unchecked` — for checkboxes
+
+**Custom switching effects** via `up:form:switch` event:
+```js
+up.on('up:form:switch', '[highlight-for]', (event) => {
+  let value = event.target.getAttribute('highlight-for')
+  event.target.style.outline = (event.field.value === value) ? '2px solid orange' : ''
+})
 ```
 
 ---
