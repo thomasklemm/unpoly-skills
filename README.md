@@ -13,7 +13,8 @@ Two skills, install either or both:
 Works with Claude Code, Cursor, OpenAI Codex, OpenCode, Amp, and [35+ more agents](https://github.com/vercel-labs/skills#supported-agents).
 
 ```bash
-npx skills add thomasklemm/unpoly-skills --skill unpoly --skill unpoly-rails
+# Install — the wizard will ask which skills you want
+npx skills add thomasklemm/unpoly-skills
 ```
 
 ---
@@ -26,10 +27,10 @@ reactive forms, lazy loading, animations, and more to any server-rendered app.
 ### Install
 
 ```bash
-# current project only
+# Add to the current project
 npx skills add thomasklemm/unpoly-skills --skill unpoly
 
-# all projects
+# Or install globally for all projects
 npx skills add thomasklemm/unpoly-skills --skill unpoly --global
 ```
 
@@ -85,10 +86,10 @@ flash messages, Turbo coexistence, and more.
 ### Install
 
 ```bash
-# current project only
+# Add to the current project
 npx skills add thomasklemm/unpoly-skills --skill unpoly-rails
 
-# all projects
+# Or install globally for all projects
 npx skills add thomasklemm/unpoly-skills --skill unpoly-rails --global
 ```
 
