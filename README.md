@@ -133,3 +133,20 @@ unpoly-rails/
 ## Unpoly version
 
 Both skills cover Unpoly **3.12**. See the [API docs](https://unpoly.com/api), [changelog](https://unpoly.com/changes), and [unpoly-rails gem](https://github.com/unpoly/unpoly-rails).
+
+---
+
+## Acknowledgements
+
+A huge thank you to [Henning Koch](https://github.com/triskweline) at [makandra](https://makandra.com) for creating and maintaining Unpoly. It's a joy to work with — a thoughtful, well-documented framework that makes server-rendered apps genuinely great without the SPA complexity tax.
+
+- [unpoly](https://github.com/unpoly/unpoly) — MIT License, Copyright (c) 2014-2021 Henning Koch
+- [unpoly-rails](https://github.com/unpoly/unpoly-rails) — MIT License, Copyright (c) 2014-2017 Henning Koch
+
+The skills in this repo are based on the official Unpoly documentation and source. This repo is independently maintained and not affiliated with makandra or the Unpoly project.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
