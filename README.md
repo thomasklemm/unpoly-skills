@@ -19,7 +19,7 @@ npx skills add thomasklemm/unpoly-skills
 
 ---
 
-## `unpoly` — Frontend
+## ⚡ `unpoly` — Frontend
 
 Covers the full [Unpoly API](https://unpoly.com/api) so your agent can add fragment updates, overlays,
 reactive forms, lazy loading, animations, and more to any server-rendered app.
@@ -77,7 +77,7 @@ unpoly/
 
 ---
 
-## `unpoly-rails` — Ruby on Rails
+## 💎 `unpoly-rails` — Ruby on Rails
 
 Covers the [`unpoly-rails`](https://github.com/unpoly/unpoly-rails) gem and everything
 specific to using Unpoly in a Rails app: server-side request helpers, Rails view syntax,
