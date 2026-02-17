@@ -7,8 +7,8 @@ Two skills, install either or both:
 
 | Skill | What it's for |
 |-------|--------------|
-| [`unpoly`](#unpoly--frontend) | Fragment updates, overlays, forms, compilers, caching, animations |
-| [`unpoly-rails`](#unpoly-rails--ruby-on-rails) | Server-side gem helpers, Rails view syntax, Turbo coexistence |
+| ⚡ [`unpoly`](#unpoly--frontend) | Fragment updates, overlays, forms, compilers, caching, animations |
+| 💎 [`unpoly-rails`](#unpoly-rails--ruby-on-rails) | Server-side gem helpers, Rails view syntax, Turbo coexistence |
 
 Works with Claude Code, Cursor, OpenAI Codex, OpenCode, Amp, and [35+ more agents](https://github.com/vercel-labs/skills#supported-agents).
 
