@@ -20,7 +20,7 @@ npx skills add thomasklemm/unpoly-skills --skill unpoly --skill unpoly-rails
 
 ## `unpoly` — Frontend
 
-Covers the full Unpoly frontend API so your agent can add fragment updates, overlays,
+Covers the full [Unpoly API](https://unpoly.com/api) so your agent can add fragment updates, overlays,
 reactive forms, lazy loading, animations, and more to any server-rendered app.
 
 ### Install
@@ -125,4 +125,4 @@ unpoly-rails/
 
 ## Unpoly version
 
-Both skills cover Unpoly **3.12**. See [unpoly.com/changes](https://unpoly.com/changes) for the changelog.
+Both skills cover Unpoly **3.12**. See the [API docs](https://unpoly.com/api), [changelog](https://unpoly.com/changes), and [unpoly-rails gem](https://github.com/unpoly/unpoly-rails).
