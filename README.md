@@ -132,7 +132,7 @@ unpoly-rails/
 
 ## Unpoly version
 
-Both skills cover Unpoly **3.12**. See the [API docs](https://unpoly.com/api), [changelog](https://unpoly.com/changes), and [unpoly-rails gem](https://github.com/unpoly/unpoly-rails).
+Both skills cover Unpoly **3.12**, last updated **February 17, 2026**. See the [API docs](https://unpoly.com/api), [changelog](https://unpoly.com/changes), and [unpoly-rails gem](https://github.com/unpoly/unpoly-rails).
 
 ---
 
