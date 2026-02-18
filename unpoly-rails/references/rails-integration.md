@@ -339,5 +339,6 @@ import 'unpoly/unpoly.css'
   ```
 - `[up-scroll='reset']` was renamed to `[up-scroll='top']`. `unpoly-migrate.js` polyfills
   this automatically.
-- `up.link.config.followSelectors` no longer treats `[up-href]`-only elements as followable
-  by default — they now require `[up-follow]` too. `unpoly-migrate.js` polyfills this.
+- Elements with only `[up-href]` (without `[up-follow]`) are no longer followed automatically
+  — add `[up-follow]` explicitly, or use a real `<a href>` instead. `unpoly-migrate.js`
+  polyfills the old behavior.
