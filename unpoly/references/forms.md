@@ -114,12 +114,37 @@ end
 <input name="password_confirmation" up-validate=".password-group">
 ```
 
-**Mark explicit form groups with `[up-form-group]`:**
+**Configure custom form group selectors via `up.form.config.groupSelectors`:**
 
 Unpoly looks for a "form group" element around the validated field — an ancestor element that
 acts as the unit of replacement. By default Unpoly recognizes `<fieldset>`, `<label>`, and the
-`<form>` itself (configured via `up.form.config.groupSelectors`). Use `[up-form-group]` to mark
-a container explicitly as the form group:
+`<form>` itself. Register custom wrappers (e.g. Bootstrap's `.form-group`) with:
+
+```js
+// Add .form-group as a recognized form group boundary
+up.form.config.groupSelectors.unshift('.form-group')
+```
+
+Use `.unshift()` to give your selector higher priority than the built-in ones.
+
+**Suppress error flash during in-flight validation with `.up-active`**
+
+When `[up-validate]` fires, Unpoly adds `.up-active` to the form while the request is in flight.
+Use this to hide error styles until the new validation response arrives, preventing the old
+error state from flashing before the fresh response replaces it:
+
+```css
+/* Show Rails error styles only when no validation request is in flight */
+.field_with_errors:not(form.up-active *) label { color: red; }
+.field_with_errors:not(form.up-active *) input { border-color: red; }
+
+/* Same for custom error messages */
+.form-error:not(form.up-active *) { color: red; }
+```
+
+**Mark explicit form groups with `[up-form-group]`:**
+
+Use `[up-form-group]` to mark a container explicitly as the form group:
 
 ```html
 <!-- Table rows as form groups for nested forms -->
