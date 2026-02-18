@@ -10,6 +10,7 @@
 - [up.hello() — compile dynamic content](#uphello--compile-dynamic-content)
 - [Layer context](#layer-context)
 - [Legacy scripts](#legacy-scripts)
+- [CapybaraLockstep integration (system tests)](#capybaralockstep-integration-system-tests)
 
 ---
 
