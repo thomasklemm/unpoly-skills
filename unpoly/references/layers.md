@@ -125,7 +125,40 @@ Override with `[up-layer]`:
 <a href="/items" up-layer="parent" up-target=".item-list">Refresh list</a>
 ```
 
-Layer values: `'current'`, `'root'`, `'parent'`, `'closest'`, `'new'`, overlay mode name, or a number (0 = root).
+Layer values: `'current'`, `'root'`, `'parent'`, `'closest'`, `'new'`, `'swap'`, overlay mode name, or a number (0 = root).
+
+**`[up-layer="swap"]`** — replace the current overlay with a new one instead of stacking:
+
+```html
+<!-- In a project overlay: navigate to the company overlay, replacing this one -->
+<a href="/companies/1" up-layer="swap">View company</a>
+```
+
+Useful for "lateral" navigation within an overlay context — the user drills into a related record
+without adding an extra layer to the stack. Combined with `[up-dismiss-location]` to auto-close
+when the user navigates back to an index:
+
+```html
+<a href="/companies/1"
+   up-layer="swap"
+   up-dismiss-location="/projects">
+  View company
+</a>
+```
+
+**`[up-dismiss-location]`** — dismiss the overlay when navigation inside it reaches a URL pattern:
+
+```html
+<!-- Overlay closes when user reaches /projects (going "back" to the index) -->
+<a href="/companies/1"
+   up-layer="swap"
+   up-dismiss-location="/projects">
+  View company
+</a>
+```
+
+Unlike `[up-accept-location]`, `[up-dismiss-location]` dismisses the layer (no accepted value),
+which triggers `[up-on-dismissed]` on the opener.
 
 **`[up-peel]`** — close overlays above the target layer before updating:
 ```html
@@ -173,7 +206,7 @@ When opening an overlay, define when it should automatically close:
 
 | Attribute | Description |
 |-----------|-------------|
-| `[up-accept-location]` | URL pattern that closes and accepts the overlay |
+| `[up-accept-location]` | URL pattern that closes and accepts the overlay (`$id` and `:id` captures become `value`) |
 | `[up-dismiss-location]` | URL pattern that closes and dismisses the overlay |
 | `[up-accept-event]` | Event name that closes and accepts the overlay (with event payload as value) |
 | `[up-dismiss-event]` | Event name that closes and dismisses the overlay |
@@ -181,6 +214,17 @@ When opening an overlay, define when it should automatically close:
 | `[up-on-dismissed]` | JS to run when overlay is dismissed |
 
 **Location-based acceptance (navigation flow):**
+
+The `:id` and `$id` wildcards both capture a URL segment and pass it as `value.id` in
+`[up-on-accepted]`. `$id` is handy when using Rails route helpers to generate the pattern:
+
+```erb
+<%# Rails: $id works with route helpers — company_path('$id') → '/companies/$id' %>
+<%= link_to 'New company', new_company_path,
+  'up-layer': 'new',
+  'up-accept-location': company_path('$id'),
+  'up-on-accepted': "up.reload('#companies')" %>
+```
 
 ```html
 <!-- Reload the opener layer's main target -->
