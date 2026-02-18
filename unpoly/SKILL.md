@@ -48,6 +48,10 @@ the smart patching, caching, overlays, and lifecycle.
 | `[up-disable]` | Disable fields/buttons during request |
 | `[up-confirm]` | Show confirmation dialog before following |
 | `[up-content]` | Open overlay from inline HTML (no request) |
+| `[up-accept-event]` | Close+accept overlay when named event fires (payload becomes `value`) |
+| `[up-dismiss-event]` | Close+dismiss overlay when named event fires |
+| `[up-form-group]` | Mark container as the validation group for `[up-validate]` |
+| `[up-main]` | Declare which element is the main target for a specific overlay mode |
 
 ## Quick reference: key JS functions
 
