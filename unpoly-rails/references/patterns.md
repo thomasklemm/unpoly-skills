@@ -3,6 +3,7 @@
 ## Table of contents
 - [Drawer overlay helper](#drawer-overlay-helper)
 - [Event-driven subinteractions](#event-driven-subinteractions)
+- [Authorization: overlay vs root layer](#authorization-overlay-vs-root-layer)
 
 ---
 
@@ -153,5 +154,41 @@ def destroy
   @company.destroy
   up.layer.emit('company:destroyed')
   redirect_to companies_path
+end
+```
+
+---
+
+## Authorization: overlay vs root layer
+
+When authorization fails, check whether the request targets an overlay. If so, return
+`head :no_content` rather than redirecting — a redirect inside an overlay would navigate
+the overlay to the redirect target (e.g. sign-in page) instead of closing it cleanly.
+
+`head :no_content` returns HTTP 204: Unpoly discards the empty response and leaves the
+overlay unchanged. Note that any `flash` message set before a 204 response won't render
+on that request — it carries over to the next full-page render.
+
+```ruby
+module DoesPunditAuthorization
+  extend ActiveSupport::Concern
+  include Pundit::Authorization
+
+  included do
+    rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  end
+
+  private
+
+  def user_not_authorized
+    if up.layer.overlay?
+      # HTTP 204: Unpoly discards the response, overlay stays open unchanged.
+      # Don't set flash here — it won't render on a 204 response.
+      head :no_content
+    else
+      flash[:alert] = 'You are not authorized to perform this action.'
+      redirect_to(request.referrer || root_path)
+    end
+  end
 end
 ```
