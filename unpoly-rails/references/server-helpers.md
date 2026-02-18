@@ -69,10 +69,11 @@ The new target applies to both successful and failed responses.
 When the action's side effects are complete (e.g., closing an overlay) and there's nothing to render:
 
 ```ruby
-up.render_nothing
+head :no_content
 ```
 
-This sends a `204 No Content` response. Equivalent to `head(:no_content)` but more explicit.
+> **Deprecated:** `up.render_nothing` was removed in unpoly-rails 3.12. Use `head(:no_content)` instead.
+> Calling `up.render_nothing` now emits an `ActiveSupport::Deprecation` warning.
 
 Typical pattern for overlay acceptance:
 
@@ -82,7 +83,7 @@ def create
   if @note.save
     if up.layer.overlay?
       up.layer.accept(@note.id)
-      up.render_nothing
+      head :no_content
     else
       redirect_to @note
     end
@@ -133,7 +134,7 @@ After calling these, always render or redirect:
 
 ```ruby
 up.layer.accept(@note.id)
-up.render_nothing
+head :no_content
 ```
 
 ### Fail layer helpers
