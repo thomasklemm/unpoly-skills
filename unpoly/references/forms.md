@@ -9,6 +9,7 @@
 - [Switching form state (up-switch)](#switching-form-state-up-switch)
 - [Disabling forms during submission](#disabling-forms-during-submission)
 - [Multi-step forms in overlays](#multi-step-forms-in-overlays)
+- [Nested forms and up.hello()](#nested-forms-and-uphello)
 
 ---
 
@@ -111,6 +112,45 @@ end
 ```html
 <input name="password" up-validate=".password-group">
 <input name="password_confirmation" up-validate=".password-group">
+```
+
+**Mark explicit form groups with `[up-form-group]`:**
+
+Unpoly looks for a "form group" element around the validated field — an ancestor element that
+acts as the unit of replacement. By default Unpoly recognizes `<fieldset>`, `<label>`, and the
+`<form>` itself (configured via `up.form.config.groupSelectors`). Use `[up-form-group]` to mark
+a container explicitly as the form group:
+
+```html
+<!-- Table rows as form groups for nested forms -->
+<tr up-form-group>
+  <td><input name="item[name]" up-validate></td>
+  <td><input name="item[price]" up-validate></td>
+  <td><button type="button" data-action="nested-form#remove">Remove</button></td>
+</tr>
+
+<!-- Div wrapper as form group -->
+<div up-form-group class="address-fields">
+  <input name="address[street]" up-validate>
+  <input name="address[city]" up-validate>
+</div>
+```
+
+This is especially important in complex layouts (tables, custom card structures) where Unpoly
+cannot infer the intended grouping boundary automatically.
+
+**Scope `[up-validate]` to a specific form to avoid collisions:**
+
+When multiple `<form>` tags may appear in a rendered page (e.g., a user-facing form plus a
+logout form in the nav), set `[up-validate]` to the specific form's selector rather than leaving
+it empty. Otherwise Unpoly may replace the wrong form element in the response:
+
+```html
+<!-- ❌ Risky if other forms exist in the response -->
+<form class="registration-form" up-submit up-validate>
+
+<!-- ✅ Scoped to this form's CSS class -->
+<form class="registration-form" up-submit up-validate="form.registration-form">
 ```
 
 ---
@@ -277,3 +317,22 @@ Open a sub-form in an overlay, then return a value to the parent form:
 ```
 
 See [layers.md](layers.md) for subinteraction patterns.
+
+**Nested forms (accepts_nested_attributes_for) + `up.hello()`:**
+
+When adding nested form rows dynamically via JS (e.g., a Stimulus controller that clones a
+template and appends it to the DOM), call `up.hello()` on the new element so Unpoly
+compilers run on the inserted fields — enabling `[up-validate]` and other Unpoly attributes:
+
+```js
+// Stimulus controller adding a nested record row
+add() {
+  let content = this.templateTarget.innerHTML.replace(/NEW_RECORD/g, new Date().getTime())
+  this.containerTarget.insertAdjacentHTML('beforeend', content)
+  let newRow = this.containerTarget.lastElementChild
+  up.hello(newRow)  // ← must call so [up-validate] etc. work in the new row
+}
+```
+
+Without `up.hello()`, Unpoly compilers won't run on dynamically inserted content, and
+attributes like `[up-validate]`, `[up-watch]`, and `[up-autosubmit]` will be silently ignored.

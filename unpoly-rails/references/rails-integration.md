@@ -251,6 +251,13 @@ Opt specific links or forms out with `[up-follow="false"]`:
 <%= form_with url: external_url, html: { 'up-follow': false } do |f| %>
 ```
 
+To follow only internal links (not external URLs with `://`), scope the selector:
+
+```js
+// Only follow internal links — leaves mailto:, external URLs, etc. unaffected
+up.link.config.followSelectors.push('a[href]:not([href*="://"])')
+```
+
 Also add preloading and instant-follow globally for snappier navigation:
 
 ```js

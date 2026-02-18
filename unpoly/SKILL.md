@@ -48,6 +48,10 @@ the smart patching, caching, overlays, and lifecycle.
 | `[up-disable]` | Disable fields/buttons during request |
 | `[up-confirm]` | Show confirmation dialog before following |
 | `[up-content]` | Open overlay from inline HTML (no request) |
+| `[up-accept-event]` | Close+accept overlay when named event fires (payload becomes `value`) |
+| `[up-dismiss-event]` | Close+dismiss overlay when named event fires |
+| `[up-form-group]` | Mark container as the validation group for `[up-validate]` |
+| `[up-main]` | Declare which element is the main target for a specific overlay mode |
 
 ## Quick reference: key JS functions
 
@@ -86,6 +90,8 @@ up.cache.evict()                                  // Clear all cache entries
 
 Load these when the user's question covers that topic:
 
+- **[installation.md](references/installation.md)** — Installing Unpoly via CDN, npm/bundler, or Ruby on Rails (importmap, jsbundling-rails, Sprockets, unpoly-rails gem)
+- **[migration.md](references/migration.md)** — Upgrading with `unpoly-migrate.js`: how it works, install, upgrade workflow, keeping it permanently, 3.11 manual migration items
 - **[fragments.md](references/fragments.md)** — Targeting, rendering options, client-side templates, handling all links/forms, `:main`, `:layer`, `:maybe`, `[up-hungry]`, `[up-keep]`, `[up-expand]`, `up.render()` options
 - **[forms.md](references/forms.md)** — Form submission, validation (`[up-validate]`), reactive forms (`[up-watch]`, `[up-autosubmit]`), form state switching (`[up-switch]`), watch options, disabling forms
 - **[layers.md](references/layers.md)** — Opening overlays, layer modes, subinteractions, close conditions, accepting/dismissing layers, layer context, targeting layers

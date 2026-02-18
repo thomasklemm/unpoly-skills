@@ -132,6 +132,29 @@ Layer values: `'current'`, `'root'`, `'parent'`, `'closest'`, `'new'`, overlay m
 <a href="/home" up-target=".content" up-layer="root" up-peel>Go home</a>
 ```
 
+**`[up-main]` — declare per-mode main targets on page elements:**
+
+Mark a page element as the main target for a specific overlay mode. Overlays use the
+`:main` selector as their default target. You can declare additional selectors per mode:
+
+```html
+<!-- This column is the main target when a drawer overlay renders content -->
+<div up-main="drawer" class="content-column">
+  ...
+</div>
+```
+
+Or configure globally in JS for all overlays / a specific mode:
+```js
+up.layer.config.overlay.mainTargets.push('.layout--content')  // all overlays
+up.layer.config.drawer.mainTargets.push('.layout--content')   // drawers only
+up.layer.config.popup.mainTargets.push('.layout--content')    // popups only
+```
+
+This lets drawer/popup responses target `.layout--content` without needing `[up-target]` on
+every link. The full layout is still rendered on direct page loads; only the content column
+is swapped when the page is opened inside an overlay.
+
 ---
 
 ## Close conditions and subinteractions
@@ -152,10 +175,12 @@ When opening an overlay, define when it should automatically close:
 |-----------|-------------|
 | `[up-accept-location]` | URL pattern that closes and accepts the overlay |
 | `[up-dismiss-location]` | URL pattern that closes and dismisses the overlay |
+| `[up-accept-event]` | Event name that closes and accepts the overlay (with event payload as value) |
+| `[up-dismiss-event]` | Event name that closes and dismisses the overlay |
 | `[up-on-accepted]` | JS to run when overlay is accepted (has `value`, `layer`) |
 | `[up-on-dismissed]` | JS to run when overlay is dismissed |
 
-**Common acceptance callbacks:**
+**Location-based acceptance (navigation flow):**
 
 ```html
 <!-- Reload the opener layer's main target -->
@@ -177,6 +202,61 @@ When opening an overlay, define when it should automatically close:
   New tag
 </a>
 ```
+
+**Event-based acceptance (emit from server controller):**
+
+Use `[up-accept-event]` when the overlay should close upon an event emitted by the server — useful
+when the standard redirect flow stays in the overlay (e.g., `redirect_to @new_record`), but you
+want the parent layer to react to the newly created record's ID.
+
+```html
+<!-- Link opens a drawer to create a tag; closes when server emits 'tag:created' -->
+<a href="/tags/new"
+   up-layer="new"
+   up-mode="drawer"
+   up-accept-event="tag:created"
+   up-on-accepted="up.reload('.tag-list')">
+  New tag
+</a>
+```
+
+The `value` in `[up-on-accepted]` is the emitted DOM event object — the keyword args passed to
+`up.layer.emit` are merged as event properties, so `value.id` returns `42`.
+
+**Event-based dismissal:**
+```html
+<!-- Overlay watching for a destructive event -->
+<a href="/company/1"
+   up-layer="new"
+   up-dismiss-event="company:destroyed"
+   up-on-dismissed="up.reload('.company-list')">
+  View company
+</a>
+```
+
+**Create related record in overlay, then validate parent form with new ID:**
+
+A common pattern when a parent form needs a foreign key for a record that doesn't exist yet.
+Open a drawer to create the record, emit an event with its ID, and inject the ID as a
+validation param so the parent form re-validates with the new value.
+
+```html
+<!-- In the parent form: "New Contact" button next to a contact_id select -->
+<a href="/contacts/new"
+   up-layer="new"
+   up-mode="drawer"
+   up-size="grow"
+   up-position="right"
+   up-accept-event="contact:created"
+   up-on-accepted="up.validate('form.deal-form', {
+     params: { 'deal[contact_id]': value.id }
+   })">
+  + New Contact
+</a>
+```
+
+For the Rails controller implementation of these patterns, see
+[patterns.md](../../unpoly-rails/references/patterns.md) in the unpoly-rails skill.
 
 **Await subinteraction from JS:**
 ```js
