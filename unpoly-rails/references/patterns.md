@@ -187,7 +187,10 @@ module DoesPunditAuthorization
       head :no_content
     else
       flash[:alert] = 'You are not authorized to perform this action.'
-      redirect_to(request.referrer || root_path)
+      # redirect_back_or_to validates the referrer is on the same host before using it.
+      # Never use redirect_to(request.referrer || root_path) — the Referer header is
+      # attacker-controllable and can be used to redirect users to external sites.
+      redirect_back_or_to root_path, allow_other_host: false
     end
   end
 end
