@@ -149,11 +149,11 @@ when the user navigates back to an index:
 **`[up-dismiss-location]`** — dismiss the overlay when navigation inside it reaches a URL pattern:
 
 ```html
-<!-- Overlay closes when user reaches /projects (going "back" to the index) -->
-<a href="/companies/1"
-   up-layer="swap"
-   up-dismiss-location="/projects">
-  View company
+<!-- Overlay auto-dismisses when the user navigates to /companies -->
+<a href="/companies/new"
+   up-layer="new modal"
+   up-dismiss-location="/companies">
+  New company
 </a>
 ```
 

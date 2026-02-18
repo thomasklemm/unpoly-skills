@@ -196,8 +196,9 @@ Use from a preview to optimistically insert new rows:
 ```js
 up.preview('add-task', function(preview) {
   let text = preview.params.get('task[text]')
+  let taskList = preview.fragment.querySelector('.task-list')
   let newRow = up.template.clone('#task-row', { text })
-  preview.insert(someContainer, 'beforeend', newRow)
+  preview.insert(taskList, 'beforeend', newRow)
 })
 ```
 

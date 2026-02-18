@@ -42,6 +42,8 @@ class CompaniesController < ApplicationController
     if @company.destroy
       up.layer.emit('company:destroyed')   # close any overlay watching for this event
       redirect_to companies_path, notice: 'Company deleted.'
+    else
+      redirect_to @company, alert: 'Could not delete company.'
     end
   end
 

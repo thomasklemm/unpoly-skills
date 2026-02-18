@@ -112,7 +112,7 @@ to a compiler as the `data` argument:
 up.compiler('.skeleton-table', function(element, { rows = 10 }) {
   let trs = element.querySelectorAll('tr')
   // Remove excess rows so the skeleton matches the expected result set size
-  Array.from(trs).slice(0, trs.length - rows).forEach(tr => tr.remove())
+  Array.from(trs).slice(rows).forEach(tr => tr.remove())
 })
 ```
 
@@ -326,7 +326,7 @@ up-progress-bar {
 
 **Configure:**
 ```js
-up.network.config.lateTime = 400  // ms before showing progress bar (default 400)
+up.network.config.lateDelay = 400  // ms before showing progress bar (default 400)
 ```
 
 **Disable:**
@@ -334,17 +334,17 @@ up.network.config.lateTime = 400  // ms before showing progress bar (default 400
 up.network.config.progressBar = false
 ```
 
-**Tip: Increase `lateTime` when all interactions have immediate preview feedback**
+**Tip: Increase `lateDelay` when all interactions have immediate preview feedback**
 
 When every link and form already shows an immediate spinner or optimistic update via
 `[up-preview]`, the global progress bar is redundant for normal connections and only
-needed as a last-resort indicator for very slow responses. Raising `lateTime` avoids
+needed as a last-resort indicator for very slow responses. Raising `lateDelay` avoids
 the progress bar flickering for fast-but-not-instant responses:
 
 ```js
 // Only show the progress bar for responses taking more than 1.25 seconds.
 // Previews/spinners already give immediate feedback for normal latency.
-up.network.config.lateTime = 1250
+up.network.config.lateDelay = 1250
 ```
 
 ---
@@ -369,7 +369,7 @@ up.on('up:network:recover', function(event) {
 
 **Configure:**
 ```js
-up.network.config.badResponseTime = 400     // ms before showing progress bar
+up.network.config.lateDelay = 400           // ms before showing progress bar
 up.network.config.cacheEvictAge = 90 * 60 * 1000  // 90 min offline cache
 ```
 
