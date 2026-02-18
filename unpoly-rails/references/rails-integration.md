@@ -7,7 +7,6 @@
 - [CSP setup](#csp-setup)
 - [Global follow-all config](#global-follow-all-config)
 - [Drawer helper for consistent overlay links](#drawer-helper-for-consistent-overlay-links)
-- [Migration: unpoly-migrate.js](#migration-unpoly-migratejs)
 
 ---
 
@@ -317,28 +316,3 @@ Use in views:
   **open_link_in_drawer_attributes(size: 'full', on_accepted: :reload, on_dismissed: :reload) %>
 ```
 
----
-
-## Migration: `unpoly-migrate.js`
-
-When upgrading Unpoly across major version ranges, include `unpoly-migrate.js` alongside
-`unpoly.js` to polyfill deprecated APIs and keep your existing HTML/JS working:
-
-```js
-import 'unpoly/unpoly.js'
-import 'unpoly/unpoly-migrate.js'  // polyfills renamed/removed APIs
-import 'unpoly/unpoly.css'
-```
-
-**Notable 3.11 breaking changes to be aware of:**
-
-- Scripts (`<script>` tags) in updated fragments no longer execute by default. If your app
-  relies on inline scripts in fragment responses, restore the old behavior:
-  ```js
-  up.fragment.config.runScripts = true
-  ```
-- `[up-scroll='reset']` was renamed to `[up-scroll='top']`. `unpoly-migrate.js` polyfills
-  this automatically.
-- Elements with only `[up-href]` (without `[up-follow]`) are no longer followed automatically
-  — add `[up-follow]` explicitly, or use a real `<a href>` instead. `unpoly-migrate.js`
-  polyfills the old behavior.
