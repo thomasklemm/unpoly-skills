@@ -213,6 +213,29 @@ up.compiler('a.lightbox', function(element) {
 
 ---
 
+## Auto-destroying elements with animation
+
+`up.util.timer()` is a cancelable wrapper around `setTimeout` that integrates with Unpoly's
+lifecycle. `up.destroy()` removes an element from the DOM with an optional animation.
+
+A common use case is auto-dismissing flash messages after a short delay:
+
+```js
+up.compiler('.alert', function(alert) {
+  // Remove the alert after 4 seconds with an upward-slide animation
+  up.util.timer(4000, () => up.destroy(alert, { animation: 'move-to-top' }))
+})
+```
+
+The timer is automatically cancelled if the `.alert` element is removed before it fires
+(e.g. the user manually dismisses it or a fragment update removes it), preventing errors
+from trying to animate an element that no longer exists.
+
+Built-in animations for `up.destroy()`: `'fade-out'`, `'move-to-top'`, `'move-to-bottom'`,
+`'move-to-left'`, `'move-to-right'`.
+
+---
+
 ## up.hello() — compile dynamic content
 
 When you insert HTML into the DOM yourself (bypassing Unpoly), call `up.hello()` to run compilers:
