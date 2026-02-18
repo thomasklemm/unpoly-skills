@@ -490,14 +490,14 @@ on the opener link close the overlay:
 Controller:
 ```ruby
 def create
-  @patient = Patient.new(patient_params)
+  @contact = Contact.new(contact_params)
   if up.validate?
-    @patient.valid?
+    @contact.valid?
     render :new, status: :unprocessable_entity
-  elsif @patient.save
+  elsif @contact.save
     # Emit event so any overlay listening with [up-accept-event] closes with this payload
-    up.layer.emit('patient:created', id: @patient.id)
-    redirect_to @patient  # normal redirect continues in the overlay
+    up.layer.emit('contact:created', id: @contact.id)
+    redirect_to @contact  # normal redirect continues in the overlay
   else
     render :new, status: :unprocessable_entity
   end
@@ -506,21 +506,21 @@ end
 
 Opener (parent form):
 ```erb
-<%= link_to icon_tag(:new), new_patient_path,
+<%= link_to icon_tag(:new), new_contact_path,
   'up-layer': 'new',
   'up-mode': 'drawer',
-  'up-accept-event': 'patient:created',
-  'up-on-accepted': "up.validate('form.appointment-form', {
-    params: { 'appointment[patient_id]': value.id }
+  'up-accept-event': 'contact:created',
+  'up-on-accepted': "up.validate('form.deal-form', {
+    params: { 'deal[contact_id]': value.id }
   })" %>
 ```
 
 `value` in `[up-on-accepted]` is the emitted DOM event object — the keyword args passed to
 `up.layer.emit` are merged as event properties, so `value.id` returns `42`.
-`up.validate` re-submits the form with the new `patient_id` so the server-rendered form
+`up.validate` re-submits the form with the new `contact_id` so the server-rendered form
 reflects the newly associated record.
 
-This pattern works for any "create related record inline" flow — patients, tags, addresses, etc.
+This pattern works for any "create related record inline" flow — contacts, companies, tags, etc.
 
 ### Authorization concern: redirect vs overlay close
 

@@ -262,37 +262,37 @@ Open a drawer to create the record, emit an event with its ID, and inject the ID
 validation param so the parent form re-validates with the new value.
 
 ```html
-<!-- In the parent form: "New Patient" button next to a patient_id select -->
-<a href="/patients/new"
+<!-- In the parent form: "New Contact" button next to a contact_id select -->
+<a href="/contacts/new"
    up-layer="new"
    up-mode="drawer"
    up-size="grow"
    up-position="right"
-   up-accept-event="patient:created"
-   up-on-accepted="up.validate('form.appointment-form', {
-     params: { 'appointment[patient_id]': value.id }
+   up-accept-event="contact:created"
+   up-on-accepted="up.validate('form.deal-form', {
+     params: { 'deal[contact_id]': value.id }
    })">
-  + New Patient
+  + New Contact
 </a>
 ```
 
-The patient controller emits an event and then redirects normally (so the new patient record
+The contact controller emits an event and then redirects normally (so the new contact record
 gets its own show page in the overlay, and the overlay is accepted when the event fires):
 
 ```ruby
-# patients_controller.rb
+# contacts_controller.rb
 def create
-  @patient = Patient.new(patient_params)
-  if @patient.save
-    up.layer.emit('patient:created', id: @patient.id)
-    redirect_to @patient
+  @contact = Contact.new(contact_params)
+  if @contact.save
+    up.layer.emit('contact:created', id: @contact.id)
+    redirect_to @contact
   else
     render :new, status: :unprocessable_entity
   end
 end
 ```
 
-After the overlay closes, `up.validate` re-submits the parent form with the new `patient_id`,
+After the overlay closes, `up.validate` re-submits the parent form with the new `contact_id`,
 triggering a validation pass so the server-rendered form reflects the newly associated record.
 
 **Await subinteraction from JS:**
