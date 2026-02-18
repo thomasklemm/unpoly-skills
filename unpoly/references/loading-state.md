@@ -113,19 +113,38 @@ up.compiler('.load-btn', function(button) {
 up.preview('my-preview', function(preview) {
   preview.fragment               // element being updated
   preview.origin                 // element that triggered the update
+  preview.params                 // form params from the pending request
 
   // All changes are reverted automatically:
   preview.addClass(element, 'loading')
   preview.removeClass(element, 'loaded')
   preview.setStyle(element, { opacity: 0.5 })
   preview.insert(element, 'beforeend', '<p>Loading…</p>')
+  preview.swapContent(element, '<span class="spinner"></span>')  // replace content, revert on response
+  preview.hide(element)          // hide element, restore on response
   preview.disable(formElement)
-  preview.showPlaceholder(element, '<div class="skeleton">…</div>')
+  preview.showPlaceholder('<div class="skeleton">…</div>')  // fill overlay placeholder area
 
   // Or return a cleanup function:
   let timer = setInterval(() => { }, 1000)
   return () => clearInterval(timer)
 })
+```
+
+**Composed previews** — apply multiple named previews with a comma-separated string:
+
+```html
+<a href="/tasks/clear" up-preview="btn-spinner, clear-tasks">Clear done</a>
+```
+
+Useful for combining a generic "show spinner on button" preview with a domain-specific
+optimistic update. Both previews run independently and are both reverted when the response arrives.
+
+In Rails/ERB you can select the preview dynamically:
+
+```erb
+<% preview = task.new_record? ? 'add-task, btn-spinner' : 'btn-spinner' %>
+<%= form_for task, html: { 'up-preview': preview } do |form| %>
 ```
 
 ---
