@@ -33,6 +33,23 @@ Layers are isolated: links and forms in an overlay only update that overlay by d
 <a href="/menu" up-layer="new">Open menu</a>
 ```
 
+> **Gotcha:** When no `[up-target]` is given, Unpoly looks for `:main` in the overlay response.
+> `:main` matches (in order): an `[up-main]` attribute, a `<main>` element, or the layer's
+> topmost swappable element. Without any of these, Unpoly throws:
+> `up.CannotMatch: Could not find common target`.
+>
+> Add `[up-main]` to the outer wrapper of views that can be opened as overlays:
+>
+> ```erb
+> <% if up.layer.overlay? %>
+>   <div class="p-6" up-main>  <%# up-main makes this the overlay's :main target %>
+>     …modal content…
+>   </div>
+> <% else %>
+>   <main>…full page layout…</main>
+> <% end %>
+> ```
+
 **From a form (successful submission opens overlay):**
 ```html
 <form action="/submit" up-submit up-layer="new">...</form>
