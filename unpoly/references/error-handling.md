@@ -189,14 +189,22 @@ Fatal errors (timeout, loss of connectivity) emit `up:request:offline` — no
 `up:fragment:loaded` is fired since there's never a response.
 
 ```js
-up.on('up:network:offline', function(event) {
+// Low-level: fired for each failed request
+up.on('up:request:offline', function(event) {
   showOfflineBanner()
   // event.request — the failed up.Request
-  // event.request.load() — retry the request
 })
 
+// Fragment-level: fired on the fragment being rendered; has retry()
+up.on('up:fragment:offline', function(event) {
+  if (confirm('Connection lost. Retry?')) {
+    event.retry()  // re-runs the render with same options
+  }
+})
+
+// When slow requests complete (not specifically offline)
 up.on('up:network:recover', function(event) {
-  hideOfflineBanner()
+  hideLateBanner()
 })
 ```
 
@@ -211,6 +219,10 @@ up.network.abort()
 // Abort requests targeting a specific fragment
 up.network.abort({ target: '.content' })
 
+// Abort by URL pattern or predicate
+up.network.abort('/users/*')
+up.network.abort((request) => request.url.includes('/slow'))
+
 // Detect abort in promise chain
 try {
   await up.render({ url: '/slow', target: '.content' })
@@ -221,7 +233,17 @@ try {
 }
 ```
 
-Aborted requests emit `up:request:aborted`.
+Two abort events exist at different levels:
+- **`up:request:aborted`** — fired on the underlying HTTP request
+- **`up:fragment:aborted`** — fired on a fragment element when its requests are aborted; also fired even when no requests are pending, so async code (timers, etc.) can use it as a general cleanup signal
+
+```js
+// Use up:fragment:aborted to cancel a timer when the fragment is aborted
+up.compiler('.live-clock', function(element) {
+  let timer = setInterval(updateClock, 1000)
+  up.fragment.onAborted(element, () => clearInterval(timer))
+})
+```
 
 ---
 
@@ -251,7 +273,14 @@ automatically insert into a designated container on every response.
 Unpoly finds the `[up-flashes]` element in the response and renders it into the
 layout's `[up-flashes]` container — regardless of what fragment was targeted.
 
+Internally, `[up-flashes]` applies `up-hungry`, `up-if-layer="subtree"`, `up-keep`, and `role="alert"` automatically.
+
 **Flashes from overlays** are shown on the parent layer when the overlay closes.
+
+**Custom transitions:**
+```html
+<div up-flashes up-transition="cross-fade" up-duration="300"></div>
+```
 
 **Auto-clear after delay:**
 ```html

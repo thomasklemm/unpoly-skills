@@ -276,6 +276,16 @@ up.cache.evict            # Evict entire cache
 up.cache.evict('/notes/*')   # Evict matching URL pattern
 ```
 
+### Cache control via response headers
+
+The gem helpers set `X-Up-Expire-Cache` / `X-Up-Evict-Cache` response headers automatically.
+You can also set them manually when using a non-Rails server:
+
+```http
+X-Up-Expire-Cache: /notes/*
+X-Up-Evict-Cache: /notes/123
+```
+
 ---
 
 ## Conditional GET (polling/reload)

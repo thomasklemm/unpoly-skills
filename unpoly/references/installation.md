@@ -19,6 +19,16 @@ The quickest way to get started — no build step required:
 Load Unpoly before your own stylesheets and scripts. Unpoly boots automatically on
 `DOMContentLoaded` and exposes its API as `window.up`.
 
+**Manual boot** — to configure Unpoly before it boots, add `[up-boot="manual"]` to `<html>`:
+```html
+<html up-boot="manual">
+```
+Then configure and call `up.boot()` when ready:
+```js
+up.fragment.config.mainTargets.push('.my-main')
+up.boot()
+```
+
 If you're migrating from an older version, also load the migration shim after Unpoly:
 
 ```html
