@@ -69,6 +69,53 @@ Show a placeholder element while a fragment loads:
 <div class="content">Current content</div>
 ```
 
+**Pattern: reusable skeleton screens in `<template>` elements**
+
+Define skeleton screens once as named `<template>` elements and reference them by ID in
+`[up-placeholder]`. Only inject the templates on the initial full-page load — on Unpoly
+fragment updates the `<template>` elements already exist in the DOM from the initial load
+and don't need to be re-sent:
+
+```erb
+<%# Only render template elements on full-page loads — Unpoly requests don't need them %>
+<%= render 'placeholders/templates' unless up? %>
+```
+
+```erb
+<%# placeholders/_templates.erb %>
+<template id="table-placeholder">
+  <%= render 'placeholders/table_skeleton' %>
+</template>
+
+<template id="form-placeholder">
+  <%= render 'placeholders/form_skeleton' %>
+</template>
+```
+
+Reference by ID and optionally pass data to a compiler that adjusts the skeleton:
+
+```erb
+<%# Show a 5-row skeleton table while the list loads %>
+<%= link_to 'Companies', companies_path,
+  'up-follow': true,
+  'up-placeholder': '#table-placeholder { rows: 5 }' %>
+
+<%# up.reload with placeholder — used after accepting an overlay %>
+'up-on-accepted': "up.reload('#companies', { placeholder: '#table-placeholder { rows: 5 }' })"
+```
+
+The `{ rows: 5 }` part is parsed as `[up-data]` on the cloned placeholder element and passed
+to a compiler as the `data` argument:
+
+```js
+// Trim skeleton rows to the expected count
+up.compiler('.skeleton-table', function(element, { rows = 10 }) {
+  let trs = element.querySelectorAll('tr')
+  // Remove excess rows so the skeleton matches the expected result set size
+  Array.from(trs).slice(0, trs.length - rows).forEach(tr => tr.remove())
+})
+```
+
 ---
 
 ## Previews (arbitrary loading state)
