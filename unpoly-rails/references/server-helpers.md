@@ -481,6 +481,75 @@ up.context[:from_company]  # => true
 
 Use this to adjust responses based on where an overlay was opened from.
 
+### Emit event + accept overlay on save (event-driven subinteraction)
+
+When a form is submitted inside an overlay and the parent layer needs the new record's ID
+(e.g., to populate a foreign key select), emit an event with the ID and let `[up-accept-event]`
+on the opener link close the overlay:
+
+Controller:
+```ruby
+def create
+  @patient = Patient.new(patient_params)
+  if up.validate?
+    @patient.valid?
+    render :new
+  elsif @patient.save
+    # Emit event so any overlay listening with [up-accept-event] closes with this payload
+    up.layer.emit('patient:created', id: @patient.id)
+    redirect_to @patient  # normal redirect continues in the overlay
+  else
+    render :new, status: :unprocessable_entity
+  end
+end
+```
+
+Opener (parent form):
+```erb
+<%= link_to icon_tag(:new), new_patient_path,
+  'up-layer': 'new',
+  'up-mode': 'drawer',
+  'up-accept-event': 'patient:created',
+  'up-on-accepted': "up.validate('form.appointment-form', {
+    params: { 'appointment[patient_id]': value.id }
+  })" %>
+```
+
+`value` in `[up-on-accepted]` is the hash passed to `up.layer.emit` — here `{ id: 42 }`.
+`up.validate` re-submits the form with the new `patient_id` so the server-rendered form
+reflects the newly associated record.
+
+This pattern works for any "create related record inline" flow — patients, tags, addresses, etc.
+
+### Authorization concern: redirect vs overlay close
+
+When authorization fails, check whether the request targets an overlay. If so, render nothing
+(or `head :no_content`) rather than redirecting — a redirect inside an overlay would navigate
+the overlay's history, not close it cleanly:
+
+```ruby
+module DoesPunditAuthorization
+  extend ActiveSupport::Concern
+  include Pundit::Authorization
+
+  included do
+    rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  end
+
+  private
+
+  def user_not_authorized
+    flash[:alert] = 'You are not authorized to perform this action.'
+
+    if up.layer.overlay?
+      head :no_content  # closes the overlay gracefully; parent layer is unaffected
+    else
+      redirect_to(request.referrer || root_path)
+    end
+  end
+end
+```
+
 ### Guard ApplicationController callbacks with `up?`
 
 Only run server-side side effects that are specific to Unpoly fragment requests:
