@@ -117,8 +117,9 @@ end
 **Mark explicit form groups with `[up-form-group]`:**
 
 Unpoly looks for a "form group" element around the validated field — an ancestor element that
-acts as the unit of replacement. By default Unpoly infers this from common patterns (`<fieldset>`,
-`.field`, etc.). Use `[up-form-group]` to mark a container explicitly as the form group:
+acts as the unit of replacement. By default Unpoly recognizes `<fieldset>`, `<label>`, and the
+`<form>` itself (configured via `up.form.config.groupSelectors`). Use `[up-form-group]` to mark
+a container explicitly as the form group:
 
 ```html
 <!-- Table rows as form groups for nested forms -->
