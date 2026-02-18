@@ -1,59 +1,9 @@
 # Unpoly Rails: Common Patterns
 
 ## Table of contents
-- [Drawer overlay helper](#drawer-overlay-helper)
 - [Event-driven subinteractions](#event-driven-subinteractions)
 - [Authorization: overlay vs root layer](#authorization-overlay-vs-root-layer)
-
----
-
-## Drawer overlay helper
-
-Extract a view helper to consistently open links in a drawer overlay with standard options:
-
-```ruby
-# app/helpers/overlay_helper.rb
-module OverlayHelper
-  def open_link_in_drawer_attributes(
-    layer: 'new', mode: 'drawer', size: 'large',
-    on_accepted: :reload, on_dismissed: nil,
-    preload: false
-  )
-    attrs = {
-      'up-layer': layer,
-      'up-mode': mode,
-      'up-size': size
-    }
-
-    attrs['up-position'] = 'right' if mode.to_s == 'drawer'
-
-    if on_accepted.present?
-      attrs['up-on-accepted'] = on_accepted == :reload ? 'up.reload()' : on_accepted
-    end
-
-    if on_dismissed.present?
-      attrs['up-on-dismissed'] = on_dismissed == :reload ? 'up.reload()' : on_dismissed
-    end
-
-    if preload
-      attrs['up-preload'] = ''
-      attrs['up-instant'] = ''
-    end
-
-    attrs
-  end
-end
-```
-
-Use in views:
-```erb
-<%# Opens in a right-hand drawer; reloads parent on accept %>
-<%= link_to contact.name, contact_path(contact), **open_link_in_drawer_attributes %>
-
-<%# Custom size and callbacks %>
-<%= link_to 'View deal', deal_path(deal),
-  **open_link_in_drawer_attributes(size: 'full', on_accepted: :reload, on_dismissed: :reload) %>
-```
+- [Drawer overlay links](#drawer-overlay-links)
 
 ---
 
@@ -194,4 +144,68 @@ module DoesPunditAuthorization
     end
   end
 end
+```
+
+---
+
+## Drawer overlay links
+
+### With an Unpoly macro (preferred)
+
+`up.macro` is the idiomatic Unpoly approach: register a macro that expands a custom
+`[data-drawer]` attribute into the full set of `up-*` attributes before any compiler runs.
+This keeps drawer configuration in one JS place rather than a Ruby helper.
+
+```js
+// app/javascript/macros/drawer_link.js
+up.macro('[data-drawer]', (link) => {
+  link.setAttribute('up-layer', 'new')
+  link.setAttribute('up-mode', 'drawer')
+  link.setAttribute('up-position', link.dataset.drawerPosition || 'right')
+  link.setAttribute('up-size', link.dataset.drawerSize || 'large')
+})
+```
+
+Use in any ERB template — no helper, no splat:
+
+```erb
+<%# Default drawer (large, right) %>
+<%= link_to contact.name, contact_path(contact), data: { drawer: true } %>
+
+<%# Full-width drawer %>
+<%= link_to 'View deal', deal_path(deal), data: { drawer: true, drawer_size: 'full' } %>
+
+<%# Still composable with up-* attributes directly %>
+<%= link_to 'New contact', new_contact_path,
+  data: { drawer: true },
+  'up-accept-event': 'contact:created',
+  'up-on-accepted': 'up.reload()' %>
+```
+
+> Rails converts `drawer_size:` to `data-drawer-size` on the element, which JavaScript reads
+> as `link.dataset.drawerSize` (camelCase). This is standard Rails/browser behaviour.
+
+### With a Ruby view helper (alternative)
+
+If you prefer to keep everything in Ruby or aren't using a JS bundler, a helper that returns
+an attribute hash works well too:
+
+```ruby
+# app/helpers/overlay_helper.rb
+module OverlayHelper
+  def drawer_link_attributes(size: 'large', position: 'right', on_accepted: :reload)
+    {
+      'up-layer': 'new',
+      'up-mode': 'drawer',
+      'up-position': position,
+      'up-size': size,
+      'up-on-accepted': on_accepted == :reload ? 'up.reload()' : on_accepted
+    }
+  end
+end
+```
+
+```erb
+<%= link_to contact.name, contact_path(contact), **drawer_link_attributes %>
+<%= link_to 'View deal', deal_path(deal), **drawer_link_attributes(size: 'full') %>
 ```
