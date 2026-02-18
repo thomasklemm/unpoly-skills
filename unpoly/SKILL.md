@@ -90,6 +90,8 @@ up.cache.evict()                                  // Clear all cache entries
 
 Load these when the user's question covers that topic:
 
+- **[installation.md](references/installation.md)** — Installing Unpoly via CDN, npm/bundler, or Ruby on Rails (importmap, jsbundling-rails, Sprockets, unpoly-rails gem)
+- **[migration.md](references/migration.md)** — Upgrading with `unpoly-migrate.js`: how it works, install, upgrade workflow, keeping it permanently, 3.11 manual migration items
 - **[fragments.md](references/fragments.md)** — Targeting, rendering options, client-side templates, handling all links/forms, `:main`, `:layer`, `:maybe`, `[up-hungry]`, `[up-keep]`, `[up-expand]`, `up.render()` options
 - **[forms.md](references/forms.md)** — Form submission, validation (`[up-validate]`), reactive forms (`[up-watch]`, `[up-autosubmit]`), form state switching (`[up-switch]`), watch options, disabling forms
 - **[layers.md](references/layers.md)** — Opening overlays, layer modes, subinteractions, close conditions, accepting/dismissing layers, layer context, targeting layers
