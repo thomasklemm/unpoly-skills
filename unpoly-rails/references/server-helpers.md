@@ -72,7 +72,7 @@ When the action's side effects are complete (e.g., closing an overlay) and there
 head :no_content
 ```
 
-> **Deprecated:** `up.render_nothing` was removed in unpoly-rails 3.12. Use `head(:no_content)` instead.
+> **Deprecated:** `up.render_nothing` is deprecated as of unpoly-rails 3.12. Use `head(:no_content)` instead.
 > Calling `up.render_nothing` now emits an `ActiveSupport::Deprecation` warning.
 
 Typical pattern for overlay acceptance:
