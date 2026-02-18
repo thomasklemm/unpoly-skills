@@ -6,8 +6,6 @@
 - [Turbo coexistence](#turbo-coexistence)
 - [CSP setup](#csp-setup)
 - [Global follow-all config](#global-follow-all-config)
-- [Drawer helper for consistent overlay links](#drawer-helper-for-consistent-overlay-links)
-
 ---
 
 ## View helper syntax
@@ -266,53 +264,4 @@ up.link.config.preloadSelectors.push('a[href]')
 up.link.config.instantSelectors.push('a[href]')
 ```
 
----
-
-## Drawer helper for consistent overlay links
-
-Extract a view helper to consistently open links in a drawer overlay with standard options:
-
-```ruby
-# app/helpers/overlay_helper.rb
-module OverlayHelper
-  def open_link_in_drawer_attributes(
-    layer: 'new', mode: 'drawer', size: 'large',
-    on_accepted: :reload, on_dismissed: nil,
-    preload: false
-  )
-    attrs = {
-      'up-layer': layer,
-      'up-mode': mode,
-      'up-size': size
-    }
-
-    attrs['up-position'] = 'right' if mode.to_s == 'drawer'
-
-    if on_accepted.present?
-      attrs['up-on-accepted'] = on_accepted == :reload ? 'up.reload()' : on_accepted
-    end
-
-    if on_dismissed.present?
-      attrs['up-on-dismissed'] = on_dismissed == :reload ? 'up.reload()' : on_dismissed
-    end
-
-    if preload
-      attrs['up-preload'] = ''
-      attrs['up-instant'] = ''
-    end
-
-    attrs
-  end
-end
-```
-
-Use in views:
-```erb
-<%# Opens in a right-hand drawer; reloads parent on accept %>
-<%= link_to record.name, record_path(record), **open_link_in_drawer_attributes %>
-
-<%# Custom size and callbacks %>
-<%= link_to 'View prescription', prescription_path(prescription),
-  **open_link_in_drawer_attributes(size: 'full', on_accepted: :reload, on_dismissed: :reload) %>
-```
 

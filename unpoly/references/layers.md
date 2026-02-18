@@ -220,19 +220,6 @@ want the parent layer to react to the newly created record's ID.
 </a>
 ```
 
-Server emits the event after saving (Rails with unpoly-rails):
-```ruby
-def create
-  @tag = Tag.new(tag_params)
-  if @tag.save
-    up.layer.emit('tag:created', id: @tag.id)   # value is { id: @tag.id }
-    redirect_to @tag                             # normal flow continues in overlay
-  else
-    render :new, status: :unprocessable_entity
-  end
-end
-```
-
 The `value` in `[up-on-accepted]` is the emitted DOM event object — the keyword args passed to
 `up.layer.emit` are merged as event properties, so `value.id` returns `42`.
 
@@ -245,14 +232,6 @@ The `value` in `[up-on-accepted]` is the emitted DOM event object — the keywor
    up-on-dismissed="up.reload('.company-list')">
   View company
 </a>
-```
-
-```ruby
-def destroy
-  @company.destroy
-  up.layer.emit('company:destroyed')
-  redirect_to companies_path
-end
 ```
 
 **Create related record in overlay, then validate parent form with new ID:**
@@ -276,24 +255,8 @@ validation param so the parent form re-validates with the new value.
 </a>
 ```
 
-The contact controller emits an event and then redirects normally (so the new contact record
-gets its own show page in the overlay, and the overlay is accepted when the event fires):
-
-```ruby
-# contacts_controller.rb
-def create
-  @contact = Contact.new(contact_params)
-  if @contact.save
-    up.layer.emit('contact:created', id: @contact.id)
-    redirect_to @contact
-  else
-    render :new, status: :unprocessable_entity
-  end
-end
-```
-
-After the overlay closes, `up.validate` re-submits the parent form with the new `contact_id`,
-triggering a validation pass so the server-rendered form reflects the newly associated record.
+For the Rails controller implementation of these patterns, see
+[patterns.md](../../unpoly-rails/references/patterns.md) in the unpoly-rails skill.
 
 **Await subinteraction from JS:**
 ```js
