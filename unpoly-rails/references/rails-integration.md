@@ -6,6 +6,8 @@
 - [Turbo coexistence](#turbo-coexistence)
 - [CSP setup](#csp-setup)
 - [Global follow-all config](#global-follow-all-config)
+- [Drawer helper for consistent overlay links](#drawer-helper-for-consistent-overlay-links)
+- [Migration: unpoly-migrate.js](#migration-unpoly-migratejs)
 
 ---
 
@@ -251,9 +253,91 @@ Opt specific links or forms out with `[up-follow="false"]`:
 <%= form_with url: external_url, html: { 'up-follow': false } do |f| %>
 ```
 
+To follow only internal links (not external URLs with `://`), scope the selector:
+
+```js
+// Only follow internal links — leaves mailto:, external URLs, etc. unaffected
+up.link.config.followSelectors.push('a[href]:not([href*="://"])')
+```
+
 Also add preloading and instant-follow globally for snappier navigation:
 
 ```js
 up.link.config.preloadSelectors.push('a[href]')
 up.link.config.instantSelectors.push('a[href]')
 ```
+
+---
+
+## Drawer helper for consistent overlay links
+
+Extract a view helper to consistently open links in a drawer overlay with standard options:
+
+```ruby
+# app/helpers/overlay_helper.rb
+module OverlayHelper
+  def open_link_in_drawer_attributes(
+    layer: 'new', mode: 'drawer', size: 'large',
+    on_accepted: :reload, on_dismissed: nil,
+    preload: false
+  )
+    attrs = {
+      'up-layer': layer,
+      'up-mode': mode,
+      'up-size': size
+    }
+
+    attrs['up-position'] = 'right' if mode.to_s == 'drawer'
+
+    if on_accepted.present?
+      attrs['up-on-accepted'] = on_accepted == :reload ? 'up.reload()' : on_accepted
+    end
+
+    if on_dismissed.present?
+      attrs['up-on-dismissed'] = on_dismissed == :reload ? 'up.reload()' : on_dismissed
+    end
+
+    if preload
+      attrs['up-preload'] = ''
+      attrs['up-instant'] = ''
+    end
+
+    attrs
+  end
+end
+```
+
+Use in views:
+```erb
+<%# Opens in a right-hand drawer; reloads parent on accept %>
+<%= link_to record.name, record_path(record), **open_link_in_drawer_attributes %>
+
+<%# Custom size and callbacks %>
+<%= link_to 'View prescription', prescription_path(prescription),
+  **open_link_in_drawer_attributes(size: 'full', on_accepted: :reload, on_dismissed: :reload) %>
+```
+
+---
+
+## Migration: `unpoly-migrate.js`
+
+When upgrading Unpoly across major version ranges, include `unpoly-migrate.js` alongside
+`unpoly.js` to polyfill deprecated APIs and keep your existing HTML/JS working:
+
+```js
+import 'unpoly/unpoly.js'
+import 'unpoly/unpoly-migrate.js'  // polyfills renamed/removed APIs
+import 'unpoly/unpoly.css'
+```
+
+**Notable 3.11 breaking changes to be aware of:**
+
+- Scripts (`<script>` tags) in updated fragments no longer execute by default. If your app
+  relies on inline scripts in fragment responses, restore the old behavior:
+  ```js
+  up.fragment.config.runScripts = true
+  ```
+- `[up-scroll='reset']` was renamed to `[up-scroll='top']`. `unpoly-migrate.js` polyfills
+  this automatically.
+- `up.link.config.followSelectors` no longer treats `[up-href]`-only elements as followable
+  by default — they now require `[up-follow]` too. `unpoly-migrate.js` polyfills this.
