@@ -112,6 +112,21 @@ up.motion.config.easing = 'ease-in-out'
 
 ---
 
+## Composing transitions inline
+
+Transitions can be composed from two animation names using a `/` separator:
+
+```html
+<!-- Old fades out, new slides in from bottom -->
+<a href="/next" up-target=".content" up-transition="fade-out/move-from-bottom">Next</a>
+```
+
+```js
+up.render({ target: '.content', url: '/next', transition: 'fade-out/move-from-top' })
+```
+
+---
+
 ## Custom animations and transitions
 
 **Register a custom animation:**
@@ -137,6 +152,26 @@ up.transition('my-slide', function(oldElement, newElement, options) {
 **Use it:**
 ```html
 <a href="/next" up-target=".content" up-transition="my-slide">Next</a>
+```
+
+---
+
+## Motion utility functions
+
+```js
+// Animate an element (string name, CSS props object, or custom function)
+up.animate(element, 'fade-in', { duration: 300 })
+up.animate(element, { opacity: 0 }, { duration: 200 })
+
+// Transition between old and new element
+up.morph(oldElement, newElement, 'cross-fade', { duration: 300 })
+
+// Jump all active animations to their final frame
+up.motion.finish()           // all animations
+up.motion.finish(element)    // animations on specific element
+
+// Check if animations are enabled
+up.motion.isEnabled()        // false when prefers-reduced-motion or config.enabled = false
 ```
 
 ---

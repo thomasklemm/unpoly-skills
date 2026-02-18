@@ -51,24 +51,34 @@ import 'unpoly/unpoly.css'
 | `up.target = 'body'` | Override the render target |
 | `up.target?('.sel')` | Is this selector targeted? |
 | `up.fail_target` | CSS selector targeted for failed responses |
+| `up.fail_target?('.sel')` | Is this selector targeted on failure? |
 | `up.any_target?('.sel')` | Is selector targeted for success or failure? |
 | `up.validate?` | Is this a form validation request? |
-| `up.validate_names` | Field names that triggered validation |
+| `up.validate_names` | Array of field names that triggered validation |
+| `up.validate_name` | First validating field name (or `nil`) |
+| `up.validate_name?('email')` | Is this specific field being validated? |
 | `up.layer.mode` | Layer mode: `"root"`, `"modal"`, `"drawer"`, etc. |
 | `up.layer.overlay?` | Is the targeted layer an overlay? |
 | `up.layer.root?` | Is the targeted layer the root layer? |
-| `up.layer.accept(value)` | Accept the current overlay |
-| `up.layer.dismiss(value)` | Dismiss the current overlay |
+| `up.layer.accept(value)` | Accept the current overlay (raises `CannotClose` on root layer) |
+| `up.layer.dismiss(value)` | Dismiss the current overlay (raises `CannotClose` on root layer) |
 | `up.layer.open(...)` | Request frontend to open a new overlay |
+| `up.layer.emit(type, props)` | Emit event on the targeted layer |
 | `up.layer.context` | Layer context hash |
 | `up.context` | Alias for `up.layer.context` |
+| `up.fail_layer.mode` | Mode of layer targeted for failed responses |
+| `up.origin_layer.mode` | Mode of the layer that caused the request |
+| `up.mode` | Shortcut for `up.layer.mode` |
+| `up.fail_mode` | Shortcut for `up.fail_layer.mode` |
+| `up.origin_mode` | Shortcut for `up.origin_layer.mode` |
 | `up.emit(type, props)` | Emit event on `document` after update |
-| `up.layer.emit(type, props)` | Emit event on the targeted layer |
-| `up.cache.expire` | Expire the client-side cache |
+| `up.cache.expire` | Expire the client-side cache (triggers revalidation) |
+| `up.cache.expire('/path/*')` | Expire matching URL pattern |
 | `up.cache.evict` | Evict entries from the client-side cache |
 | `up.title = 'Title'` | Set document title from server |
+| `up.version` | Unpoly JS version string (from `X-Up-Version` header) |
 | `up.safe_callback("js()")` | CSP-safe inline callback with nonce |
-| `up.render_nothing` | Render empty 204 response |
+| `head(:no_content)` | Render empty 204 response (replaces deprecated `up.render_nothing`) |
 | `up.no_vary { }` | Read Unpoly headers without setting Vary |
 
 ## Reference files

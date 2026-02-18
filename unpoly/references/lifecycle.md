@@ -17,13 +17,15 @@ For every render pass, Unpoly follows this sequence:
 
 1. **User interaction** (link click, form submit, `up.render()`)
 2. **`up:link:follow`** or **`up:form:submit`** — preventable, options mutable
-3. **Fetch** — request sent (or cache hit)
-4. **`up:fragment:loaded`** — response received, preventable
-5. **Compile** — compilers run on new elements
-6. **`up:fragment:inserted`** — after insert, after compile
-7. **Animation** — transition plays
-8. **`up:fragment:rendered`** — after animation
-9. *(Optional)* **Revalidation** — if cache expired, repeat from step 3
+3. **`up:request:load`** — before request is sent; preventable, options mutable
+4. **Fetch** — request sent (or cache hit)
+5. **`up:request:loaded`** — response received (including HTTP errors)
+6. **`up:fragment:loaded`** — response received, before DOM changes; preventable
+7. **Compile** — compilers run on new elements
+8. **`up:fragment:inserted`** — after insert, after compile
+9. **Animation** — transition plays
+10. **`up:fragment:rendered`** — after animation
+11. *(Optional)* **Revalidation** — if cache expired, repeat from step 3
 
 ---
 
@@ -61,6 +63,22 @@ result.layer          // Layer that was updated
 result.response       // The up.Response object
 ```
 
+**`up.Response` properties** (available in `event.response`, render results, `up:fragment:loaded`):
+```js
+response.url          // URL from which the response was loaded
+response.status       // HTTP status code (e.g. 200, 422)
+response.ok           // true if 2xx
+response.text         // response body as string
+response.json         // body parsed as JSON (cached)
+response.contentType  // content-type header
+response.etag         // ETag header value
+response.lastModified // Last-Modified header as Date
+response.expired      // true if cached response has expired
+response.age          // milliseconds since the response was received
+response.header(name) // read any response header (case-insensitive)
+response.isHTML()     // true if content-type is text/html
+```
+
 ---
 
 ## Key lifecycle events
@@ -72,9 +90,13 @@ result.response       // The up.Response object
 | `up:fragment:loaded` | Response received, before render | Yes |
 | `up:fragment:inserted` | After insert, after compile | No |
 | `up:fragment:rendered` | After animation completes | No |
-| `up:fragment:destroyed` | Element removed from DOM | No |
-| `up:fragment:keep` | Element is being kept (up-keep) | Yes |
+| `up:fragment:destroyed` | Element removed from DOM (emitted on parent) | No |
+| `up:fragment:keep` | Element is about to be kept (`[up-keep]`) | Yes |
+| `up:fragment:kept` | Element was kept (after keep) | No |
+| `up:fragment:hungry` | Hungry element about to be included in render | Yes |
 | `up:fragment:poll` | Before polling reload | Yes |
+| `up:fragment:aborted` | Fragment requests were aborted | No |
+| `up:fragment:offline` | Network failure during render | No |
 
 ### Link events
 
@@ -95,11 +117,12 @@ result.response       // The up.Response object
 | Event | When | Preventable |
 |-------|------|------------|
 | `up:layer:open` | Before opening overlay | Yes |
-| `up:layer:opened` | After opening overlay | No |
-| `up:layer:close` | Before closing overlay | Yes |
-| `up:layer:closed` | After closing overlay | No |
-| `up:layer:accept` | Layer is accepting with value | Yes |
-| `up:layer:dismiss` | Layer is dismissing | Yes |
+| `up:layer:opened` | After opening, before animation | No |
+| `up:layer:accept` | Layer is about to accept | Yes |
+| `up:layer:accepted` | Layer was accepted | No |
+| `up:layer:dismiss` | Layer is about to dismiss | Yes |
+| `up:layer:dismissed` | Layer was dismissed | No |
+| `up:layer:location:changed` | URL changed within a layer | No |
 
 ### Location events
 
@@ -108,12 +131,16 @@ result.response       // The up.Response object
 | `up:location:changed` | URL changed in browser | No |
 | `up:location:restore` | Back/forward navigation | Yes |
 
-### Network events
+### Network / request events
 
 | Event | When | Preventable |
 |-------|------|------------|
-| `up:network:offline` | Connection lost | No |
-| `up:network:recover` | Connection restored | No |
+| `up:request:load` | Before request is sent; listeners may mutate request options | Yes |
+| `up:request:loaded` | Response received (including HTTP errors) | No |
+| `up:request:offline` | Fatal network failure for a specific request (timeout, disconnect) | No |
+| `up:request:aborted` | HTTP request was aborted | No |
+| `up:network:late` | Requests taking longer than `lateDelay` ms | No |
+| `up:network:recover` | All late requests have completed | No |
 
 **Listen to events:**
 ```js
@@ -124,12 +151,15 @@ up.on('up:fragment:inserted', '.result', function(event, element) {
 // Listen on a specific element
 up.on(myElement, 'up:fragment:inserted', handler)
 
-// One-time listener
-up.once('up:fragment:inserted', handler)
-
 // Remove listener
 let off = up.on('up:fragment:inserted', handler)
 off()  // Remove
+
+// Emit a custom event
+up.emit(element, 'user:selected', { id: 5 })
+
+// Current input device ('key', 'pointer', 'unknown')
+up.event.inputDevice
 ```
 
 ---
@@ -249,24 +279,29 @@ they emit an `error` event on `window` and the render succeeds.
 | `X-Up-Fail-Target` | `.errors` | Target for failed responses |
 | `X-Up-Mode` | `root` | Current layer mode |
 | `X-Up-Fail-Mode` | `root` | Layer mode for failures |
+| `X-Up-Origin-Mode` | `modal` | Mode of the layer that triggered the request |
 | `X-Up-Context` | `{"key":"val"}` | Current layer context |
 | `X-Up-Fail-Context` | `{"key":"val"}` | Fail layer context |
-| `X-Up-Validate` | `email,name` | Fields being validated |
+| `X-Up-Validate` | `email name` | Space-separated field names being validated |
+| `If-None-Match` | `"abc123"` | ETag for conditional requests |
+| `If-Modified-Since` | `Wed, 21 Oct 2024…` | Last-modified for conditional requests |
 
 ### Response headers accepted by Unpoly
 
 | Header | Example | Description |
 |--------|---------|-------------|
-| `X-Up-Target` | `.main` | Override the target selector |
-| `X-Up-Accept-Layer` | `{"id": 5}` | Accept overlay with JSON value |
-| `X-Up-Dismiss-Layer` | `null` | Dismiss overlay with JSON value |
+| `X-Up-Target` | `.main` | Override the target selector (`':none'` skips rendering) |
+| `X-Up-Accept-Layer` | `{"id": 5}` | Accept overlay with JSON value (ignored on root layer) |
+| `X-Up-Dismiss-Layer` | `null` | Dismiss overlay with JSON value (ignored on root layer) |
 | `X-Up-Open-Layer` | `{}` | Force-open new overlay |
-| `X-Up-Context` | `{"role":"admin"}` | Merge into current layer context |
+| `X-Up-Context` | `{"role":"admin"}` | Merge into current layer context (only changed keys) |
 | `X-Up-Events` | `[{"type":"user:created"}]` | Emit custom events on frontend |
 | `X-Up-Location` | `/canonical/url` | Override URL pushed to history |
 | `X-Up-Method` | `GET` | HTTP method for history URL |
-| `X-Up-Title` | `Page Title` | Override document title |
+| `X-Up-Title` | `"Page Title"` | Override document title (JSON-encoded string) |
 | `X-Up-Poll` | `stop` | Stop a polling element |
+| `X-Up-Expire-Cache` | `"/users/*"` | Expire matching client-side cache entries |
+| `X-Up-Evict-Cache` | `"/users/*"` | Remove matching cache entries entirely |
 
 ### unpoly-rails gem helpers
 

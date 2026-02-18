@@ -21,6 +21,9 @@
 
 ## Detecting an Unpoly request
 
+The `up` object and `up?` helper are available in **controllers, views, and helpers** —
+no includes required. The gem registers them as Rails helper methods automatically.
+
 ```ruby
 up?  # => true or false
 ```
@@ -33,6 +36,15 @@ up.target?('.sidebar')     # Is this selector being targeted?
 up.fail_target             # Selector targeted for failed responses (4xx/5xx)
 up.fail_target?('.errors') # Is this selector targeted on failure?
 up.any_target?('.flash')   # Targeted for success OR failure?
+```
+
+Access layer mode directly:
+
+```ruby
+up.mode               # => 'root', 'modal', 'drawer', etc. (shortcut for up.layer.mode)
+up.fail_mode          # Mode of layer targeted for failed responses
+up.origin_mode        # Mode of the layer that triggered the request
+up.version            # Unpoly JS version string (from X-Up-Version header)
 ```
 
 > **Gotcha:** `up.target?` always returns `true` for non-Unpoly requests (regular page loads,
@@ -130,6 +142,13 @@ up.layer.dismiss         # Dismiss overlay (close with cancel signal)
 up.layer.dismiss(:cancel) # Dismiss with a value
 ```
 
+> **Gotcha:** `up.layer.accept` and `up.layer.dismiss` raise `Unpoly::Rails::CannotClose`
+> when called on the root layer (i.e., when `up.layer.root?` is true). Always guard:
+>
+> ```ruby
+> up.layer.accept(@user) if up.layer.overlay?
+> ```
+
 After calling these, always render or redirect:
 
 ```ruby
@@ -221,7 +240,8 @@ end
 Inspect which fields triggered validation:
 
 ```ruby
-up.validate_names          # => ['email', 'password']
+up.validate_names          # => ['email', 'password'] (array, may contain multiple when batched)
+up.validate_name           # => 'email' (first name, or nil if not validating)
 up.validate_name?('email') # => true
 ```
 
@@ -254,6 +274,26 @@ up.context.replace(JSON.parse(File.read('context.json')))
 
 `up.context` is an alias for `up.layer.context`.
 
+**Read raw context before server changes:**
+
+```ruby
+up.input_context         # raw context hash received from frontend (before server mutations)
+up.input_fail_context    # raw fail context
+```
+
+> **Gotcha — deep mutation detection:** Mutations made via `up.context[:key] = value` are
+> tracked automatically. However, mutating a nested hash directly
+> (e.g., `up.context[:hash][:key] = value`) may be silently detected by `finalize_changes`
+> at end of request, but it's safer to always use `=` assignment:
+>
+> ```ruby
+> # Safe — tracked immediately
+> up.context[:prefs] = { theme: 'dark' }
+>
+> # Risky — relies on deep mutation detection at response time
+> up.context[:prefs][:theme] = 'dark'
+> ```
+
 ---
 
 ## Cache control
@@ -267,6 +307,9 @@ up.cache.expire           # Expire entire cache
 up.cache.expire('/notes/*')  # Expire matching URL pattern
 ```
 
+> `up.cache.clear` is an alias for `up.cache.expire` (deprecated name — use `expire`).
+> `up.cache.keep` is a no-op (deprecated — the server can no longer prevent cache expiration).
+
 ### Evicting cache entries
 
 Remove entries from the cache entirely (no revalidation):
@@ -274,6 +317,16 @@ Remove entries from the cache entirely (no revalidation):
 ```ruby
 up.cache.evict            # Evict entire cache
 up.cache.evict('/notes/*')   # Evict matching URL pattern
+```
+
+### Cache control via response headers
+
+The gem helpers set `X-Up-Expire-Cache` / `X-Up-Evict-Cache` response headers automatically.
+You can also set them manually when using a non-Rails server:
+
+```http
+X-Up-Expire-Cache: /notes/*
+X-Up-Evict-Cache: /notes/123
 ```
 
 ---

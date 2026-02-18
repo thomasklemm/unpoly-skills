@@ -41,6 +41,7 @@ When `[up-target]` is omitted, Unpoly updates the **main target** (usually `<mai
 | `:main` | The page's primary content area (`<main>` by default) |
 | `:layer` | The entire layer (topmost swappable element) |
 | `:none` | Make a request with no DOM change |
+| `:origin` | Replaced with derived selector of the origin element |
 | `.foo:maybe` | Target `.foo` only if present in both page and response |
 | `.foo:after` | Append children to `.foo` |
 | `.foo:before` | Prepend children to `.foo` |
@@ -90,6 +91,19 @@ When one target is an ancestor of another, only the ancestor is requested.
 ```
 Common for notification badges, nav bars, flash messages that live outside the targeted fragment.
 
+**`[up-hungry]` attributes:**
+
+| Attribute | Default | Description |
+|-----------|---------|-------------|
+| `[up-if-layer]` | `'current'` | Layer filter: `'current'`, `'any'`, `'subtree'`, etc. |
+| `[up-transition]` | — | Transition animation when updating |
+| `[up-on-hungry]` | — | Callback code; call `event.preventDefault()` to skip update |
+
+```html
+<!-- Skip update when overlay is open -->
+<div class="notifications" up-hungry up-on-hungry="if (up.layer.isOverlay()) event.preventDefault()">
+```
+
 By default, `[up-hungry]` only fires when the element's own layer is targeted. Use
 `[up-if-layer="any"]` to update the element even when requests target a different layer
 (e.g. an overlay):
@@ -115,7 +129,34 @@ reflect the most recent server action regardless of which layer was targeted.
 ```
 
 Unpoly keeps the old element in place when a matching `[up-keep]` element is found in the response.
-Match is by element type + `[id]` by default. Customize with `[up-keep="..."]` CSS selector.
+Match is by element type + `[id]` by default.
+
+**`[up-keep]` values:**
+
+| Value | Behavior |
+|-------|---------|
+| `true` (default) | Keep element; match by type + `[id]` |
+| CSS selector | Keep element; match if new element matches selector |
+| `same-html` | Keep only if new element has same HTML content |
+| `same-data` | Keep only if new element has same `[up-data]` |
+| `false` | Always replace (overrides existing `[up-keep]`) |
+
+**`[up-on-keep]`** — run code when an element is kept (receives `event`, `newFragment`, `newData`):
+```html
+<audio src="music.mp3" up-keep up-on-keep="if (newFragment.src !== element.src) event.preventDefault()"></audio>
+```
+
+**Force update on a link/form** with `[up-use-keep="false"]` to override kept elements:
+```html
+<a href="/reset" up-use-keep="false">Hard reset</a>
+```
+
+Or from JS: `up.render({ url: '/reset', keep: false })`
+
+**`[up-id]`** — unique identifier for target derivation (alternative to `[id]` for keeping elements with predictable selectors):
+```html
+<div class="chart" up-id="revenue-chart" up-keep></div>
+```
 
 **`[up-expand]`** — make a non-link area clickable by delegating to a child link:
 
@@ -284,6 +325,61 @@ Combine with `[up-follow]` to also navigate after emitting:
 
 ---
 
+## Fragment utility functions
+
+```js
+// Element lookup (layer-aware, ignores .up-destroying elements)
+up.fragment.get('.content')           // First match in current layer
+up.fragment.get(root, '.item', { layer: 'root' })  // From root, specific layer
+up.fragment.all('.item')              // All matches in current layer
+up.fragment.closest(element, '.card') // Nearest ancestor within same layer
+up.fragment.subtree(element, '.item') // Descendants + self matching selector
+up.fragment.contains(root, selector)  // Containment check within layer
+
+// Source/ETag/time of a fragment
+up.fragment.source(element)           // URL fragment was loaded from ([up-source])
+up.fragment.etag(element)             // ETag from [up-etag]
+up.fragment.time(element)             // Date from [up-time]
+
+// Target derivation
+up.fragment.toTarget(element)         // Derives CSS selector; throws up.CannotTarget if impossible
+up.fragment.isTargetable(element)     // Boolean version of toTarget
+up.fragment.isAlive(element)          // True if connected and not in exit animation
+
+// Aborting
+up.fragment.abort(element)            // Abort requests for element; always emits up:fragment:aborted
+up.fragment.abort({ layer: 'root' })  // Abort by layer
+up.fragment.onAborted(element, fn)    // Callback when element (or ancestor) is aborted; auto-cleanup on destroy
+```
+
+**Note on `up.fragment.get` vs `document.querySelector`:**
+- Only searches the current layer unless `{ layer }` is explicit
+- Ignores elements with `.up-destroying` (in exit animation)
+- Supports Unpoly-specific selectors (`:main`, `:layer`)
+- With `{ origin }`, prefers region-aware matching first (nearest to origin element)
+
+---
+
+## Fragment config (`up.fragment.config`)
+
+```js
+up.fragment.config.mainTargets        // ['[up-main]', 'main', ':layer'] — main element selectors
+up.fragment.config.runScripts         // false — whether to execute <script> in updated fragments
+up.fragment.config.autoRevalidate     // (response) => response.expired — revalidation rule
+up.fragment.config.skipResponse       // Function — skips empty/unchanged responses
+up.fragment.config.match              // 'region' — prefer region-aware matching; or 'first'
+up.fragment.config.badTargetClasses   // CSS classes ignored during target derivation (e.g. 'active', 'selected')
+up.fragment.config.targetDerivers     // Array of patterns/functions for automatic target derivation
+
+// Applied to all render passes:
+up.fragment.config.renderOptions      // { hungry: true, keep: true, saveScroll: true, ... }
+
+// Applied additionally when { navigate: true }:
+up.fragment.config.navigateOptions    // { cache: 'auto', revalidate: 'auto', history: 'auto', ... }
+```
+
+---
+
 ## up.render() options
 
 Key options for `up.render()`, `up.follow()`, `up.navigate()`:
@@ -313,11 +409,18 @@ Key options for `up.render()`, `up.follow()`, `up.navigate()`:
 ### Rendering local content without a server request
 
 ```js
-// From a string
+// { content } — replace children of target element
 up.render({ target: '.content', content: '<p>Hello</p>' })
 
-// From a template element
-up.render({ target: '.content', fragment: document.querySelector('#my-template') })
+// { fragment } — target derived from root element; no explicit target needed
+up.render({ fragment: '<div class="content"><p>Hello</p></div>' })
+
+// { document } — extract fragment from larger HTML string
+up.render({ target: '.content', document: fullHTML })
+
+// { response } — render from a previously fetched up.Response object
+let response = await up.request('/path')
+up.render({ target: '.content', response })
 ```
 
 ```html

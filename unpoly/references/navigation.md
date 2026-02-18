@@ -40,13 +40,19 @@ up.fragment.config.navigateOptions.history = false // disable history for naviga
 
 ## Active nav links (up-current)
 
-Unpoly automatically adds `.up-current` to links whose `[href]` matches the current browser URL:
+Unpoly automatically adds `.up-current` to links whose `[href]` matches the current browser URL.
+This works automatically inside `<nav>` elements. Mark other containers with `[up-nav]`:
 
 ```html
 <nav>
   <a href="/dashboard">Dashboard</a>  <!-- gets .up-current when at /dashboard -->
   <a href="/users">Users</a>
 </nav>
+
+<!-- Explicitly mark a container as nav -->
+<div class="sidebar" up-nav>
+  <a href="/settings">Settings</a>
+</div>
 ```
 
 Style active links with CSS:
@@ -70,6 +76,12 @@ nav a.up-current {
 **Configure the current class:**
 ```js
 up.history.config.currentClasses = ['active', 'up-current']
+```
+
+**`up-nav` config:**
+```js
+up.status.config.navSelectors      // ['[up-nav]', 'nav'] — containers that track current URL
+up.status.config.currentClasses    // ['up-current']
 ```
 
 ---
@@ -113,10 +125,24 @@ up.history.location  // Current URL string
 X-Up-Location: /canonical-url
 ```
 
+**Check current URL:**
+```js
+up.history.location           // current URL string
+up.history.isLocation('/foo') // true if current URL matches (normalizes host)
+```
+
 **Configure defaults:**
 ```js
 up.fragment.config.navigateOptions.history = true  // default
-up.history.config.updateMetaTags = true  // sync <title>, <meta> on navigation
+up.history.config.updateMetaTags = true   // sync <title>, <meta>, canonical etc. on navigation
+up.history.config.metaTagSelectors        // what counts as a meta tag (link[rel=canonical], etc.)
+up.history.config.restoreTargets = ['body']  // selectors restored on back/forward (default: body)
+```
+
+**`[up-meta]`** — mark custom `<head>` elements for synchronization during history changes:
+```html
+<link rel="license" href="..." up-meta>
+<meta charset="utf-8" up-meta="false">  <!-- explicitly exclude -->
 ```
 
 ---
@@ -160,9 +186,20 @@ up.viewport.config.scrollBehavior = 'smooth'
 </div>
 ```
 
-**Anchored headers** — prevent content from being obscured by fixed headers:
+**Fixed elements** — tell Unpoly about `position: fixed` elements so it can compensate scroll and overlay width:
 ```html
-<nav class="header" up-fixed="top">...</nav>
+<nav class="header" up-fixed="top">...</nav>      <!-- fixed to top -->
+<footer up-fixed="bottom">...</footer>             <!-- fixed to bottom -->
+<div class="sidebar" up-anchored="right">...</div> <!-- anchored to right edge -->
+```
+
+When a scrolling overlay opens, Unpoly adjusts the `right` position of `[up-anchored="right"]` and `[up-fixed]` elements to prevent layout shift. Use the `--up-scrollbar-width` CSS variable if you need to compensate manually.
+
+**Custom viewport** — tell Unpoly which element is the scroll container:
+```html
+<div class="scroll-container" up-viewport>
+  <!-- Unpoly will scroll this element -->
+</div>
 ```
 
 ---
@@ -259,6 +296,11 @@ pattern.recognize('/users/5') // { id: '5' }
 
 If no previous URL is known, the link falls back to the `[href]` value.
 
+**`up.history.previousLocation`** — the previous URL:
+```js
+up.history.previousLocation  // URL string or undefined
+```
+
 **`[up-instant]`** — follow a link on mousedown instead of click (faster perceived response):
 ```html
 <a href="/users" up-follow up-instant>Users</a>
@@ -267,6 +309,33 @@ If no previous URL is known, the link falls back to the `[href]` value.
 Configure globally:
 ```js
 up.link.config.instantSelectors.push('a[href]')
+```
+
+**`[up-preload]` timing values:**
+
+| Value | Behavior |
+|-------|---------|
+| `hover` (default) | Preload after hovering for `preloadDelay` ms (default: 90ms) |
+| `insert` | Preload immediately when link is inserted into DOM |
+| `reveal` | Preload when link scrolls into viewport |
+
+```html
+<a href="/dashboard" up-preload="reveal">Dashboard</a>
+<a href="/dashboard" up-preload up-preload-delay="200">Dashboard</a>
+```
+
+Configure preload delay globally:
+```js
+up.link.config.preloadDelay = 90  // default: 90ms
+```
+
+**`up:click`** — normalized click event that honors `[up-instant]`:
+```js
+// Fires on mousedown for [up-instant] elements, click for others
+// Not fired for modifier keys (Shift/Ctrl/Meta), non-primary buttons, or drags
+up.on('up:click', 'a.special', function(event) {
+  event.preventDefault()
+})
 ```
 
 **Combine instant + preload for maximum perceived speed:**
@@ -295,7 +364,7 @@ fragment content from cache (or re-fetches if expired).
 
 **Scroll restoration:** Scroll positions are automatically restored when navigating back.
 ```js
-up.history.config.restoreTargets = ['.content']  // Default restore targets
+up.history.config.restoreTargets = ['body']  // Default restore targets (tries each in order)
 ```
 
 **`[up-restore-scroll]`** — restore scroll position to a specific element:
@@ -306,7 +375,18 @@ up.history.config.restoreTargets = ['.content']  // Default restore targets
 **Custom restore behavior:**
 ```js
 up.on('up:location:restore', function(event) {
-  // event.location is the URL being restored
-  // event.defaultPrevented to skip default restore
+  event.location       // URL being restored
+  event.renderOptions  // mutable render options for the restoration pass
+  event.preventDefault()  // stop Unpoly from restoring (browser still updates URL)
+})
+```
+
+**`up:location:changed` event properties:**
+```js
+up.on('up:location:changed', function(event) {
+  event.location          // new URL (already in address bar)
+  event.previousLocation  // URL before the change
+  event.reason            // 'push', 'replace', 'pop', or 'hash'
+  event.willHandle        // mutable: set false to suppress Unpoly's handling
 })
 ```

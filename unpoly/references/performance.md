@@ -43,9 +43,29 @@ The expired entries are still used for instant rendering, then revalidated.
 **Manually manage cache:**
 ```js
 up.cache.expire()                          // Mark all stale (will revalidate)
-up.cache.expire('/users')                  // Mark specific URL stale
+up.cache.expire('/users')                  // Mark specific URL stale (URL pattern)
 up.cache.evict()                           // Remove all entries
 up.cache.evict({ url: '/users' })          // Remove specific entry
+up.cache.get({ url: '/users' })            // Look up cached request (may still be in-flight)
+```
+
+**Network utilities:**
+```js
+up.network.isBusy()                        // true if any request is in flight
+up.request('/api/data', { method: 'GET' }) // Make a raw request (returns up.Request)
+up.network.abort()                         // Abort all pending requests
+up.network.abort({ target: '.content' })   // Abort requests targeting a fragment
+```
+
+**Network config:**
+```js
+up.network.config.concurrency = 6         // max concurrent requests (extras queued)
+up.network.config.timeout = 90_000        // default request timeout (ms)
+up.network.config.lateDelay = 400         // ms before showing progress bar
+up.network.config.cacheExpireAge = 15_000 // ms until entry triggers revalidation
+up.network.config.cacheEvictAge = 90 * 60 * 1000  // ms until entry is removed
+up.network.config.cacheSize = 70          // max cached responses
+up.network.config.wrapMethod = true       // wrap PATCH/PUT/DELETE as POST + _method param
 ```
 
 ---
@@ -149,10 +169,23 @@ Load a fragment only when needed, not on initial page render:
 >
 > If the ids don't match, Unpoly cannot find the fragment to replace.
 
-**Load when element scrolls into view:**
+**`[up-defer]` timing values:**
+
+| Value | Behavior |
+|-------|---------|
+| `insert` (default) | Load immediately when inserted into DOM |
+| `reveal` | Load when element scrolls into viewport |
+| `manual` | Only load when explicitly triggered via `up.deferred.load()` |
+
 ```html
-<div up-defer="/recommendations" up-defer-reveal>
+<!-- Load on viewport entry -->
+<div up-defer="/recommendations" up-defer="reveal">
   <p class="placeholder">Loading recommendations…</p>
+</div>
+
+<!-- Manual load (e.g. triggered by a button click) -->
+<div id="heavy-chart" up-defer="/chart" up-defer="manual">
+  <p class="placeholder">Chart not loaded yet</p>
 </div>
 ```
 
@@ -165,7 +198,19 @@ The server returns a full page; only the matching fragment is used:
 **Trigger manually from JS:**
 ```js
 let deferElement = document.querySelector('[up-defer]')
-up.deferred.load(deferElement)
+up.deferred.load(deferElement)  // also: up.link.deferred.load(element)
+```
+
+**`up:deferred:load` event** — fires before deferred content is loaded; preventable:
+```js
+up.on('up:deferred:load', '[up-defer]', function(event) {
+  if (!userHasPermission) event.preventDefault()
+})
+```
+
+**`[up-intersect-margin]`** — expand/contract intersection zone for `reveal` mode:
+```html
+<div up-defer="/content" up-defer="reveal" up-intersect-margin="200px">
 ```
 
 **Caching:** Deferred fragments respect the cache. If the URL is already cached,
@@ -177,6 +222,21 @@ the fragment renders instantly.
 <div up-defer="/dashboard #revenue-chart"></div>
 <!-- Both use the same cached response -->
 ```
+
+**Pattern: infinite scrolling** — trigger on reveal + append with `:after`:
+```html
+<div id="pages">
+  <div class="page"><!-- items page 1 --></div>
+</div>
+
+<a id="next-page" href="/items?page=2"
+   up-defer="reveal"
+   up-target="#next-page, #pages:after">
+  Load more
+</a>
+```
+The response returns the next page items plus an updated `#next-page` link for page 3.
+On the last page, render `#next-page` as a non-link element to stop loading.
 
 ---
 
@@ -195,16 +255,26 @@ Reload a fragment on a timer:
 <div class="status" up-poll up-source="/api/status">...</div>
 ```
 
+**`[up-poll]` attributes:**
+
+| Attribute | Default | Description |
+|-----------|---------|-------------|
+| `[up-interval]` | `30000` | Reload interval in ms |
+| `[up-if-layer]` | `'front'` | `'front'` pauses under overlays; `'any'` continues |
+| `[up-href]` | source URL | Override the URL to poll |
+| `[up-keep-data]` | — | Preserve fragment data object across reloads |
+
 **Control polling from JS:**
 ```js
 up.radio.startPolling(element, { interval: 10000 })
+up.radio.startPolling(element, { interval: 10000, ifLayer: 'any' })
 up.radio.stopPolling(element)
 ```
 
 **Smart polling:** Unpoly pauses polling when:
 - The browser tab is hidden
 - The user is offline
-- The layer with the polling element is not frontmost
+- The layer with the polling element is not frontmost (when `up-if-layer="front"`)
 
 **Server can stop polling** by responding with `X-Up-Poll: stop` header.
 
@@ -281,5 +351,14 @@ Vary: X-Up-Mode
 | `X-Up-Fail-Target` | `.errors` | Target for failed responses |
 | `X-Up-Mode` | `root` | Current layer mode |
 | `X-Up-Fail-Mode` | `root` | Layer mode for failed responses |
+| `X-Up-Origin-Mode` | `modal` | Mode of layer where interaction originated |
 | `X-Up-Context` | `{...}` | Current layer context (JSON) |
+| `X-Up-Fail-Context` | `{...}` | Context of failure layer (JSON) |
 | `X-Up-Validate` | `email` | Field being validated |
+
+### Server can control cache via response headers
+
+| Header | Example | Meaning |
+|--------|---------|---------|
+| `X-Up-Expire-Cache` | `"/users/*"` | Expire matching cache entries |
+| `X-Up-Evict-Cache` | `"/users/*"` | Remove matching cache entries entirely |

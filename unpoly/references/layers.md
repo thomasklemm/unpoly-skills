@@ -125,7 +125,12 @@ Override with `[up-layer]`:
 <a href="/items" up-layer="parent" up-target=".item-list">Refresh list</a>
 ```
 
-Layer values: `'current'`, `'root'`, `'parent'`, `'closest'`, `'new'`, `'swap'`, overlay mode name, or a number (0 = root).
+Layer values: `'current'`, `'root'`, `'parent'`, `'closest'`, `'origin'`, `'front'`, `'new'`, `'swap'`, `'shatter'`, overlay mode name, or a number (0 = root).
+
+**`[up-layer="shatter"]`** — dismiss all overlays, then open from root:
+```html
+<a href="/home" up-layer="shatter">Start over</a>
+```
 
 **`[up-layer="swap"]`** — replace the current overlay with a new one instead of stacking:
 
@@ -383,21 +388,54 @@ Context is preserved across fragment updates within that layer.
 up.layer.current         // up.Layer object
 up.layer.current.mode    // 'root', 'modal', 'drawer', etc.
 up.layer.current.element // The layer's container element
+up.layer.current.location // Current layer URL
+up.layer.current.context // Layer context object
+up.layer.current.parent  // Parent layer reference
 
 // Layer stack
 up.layer.count           // number of open layers
 up.layer.root            // root layer
 up.layer.front           // topmost layer
+up.layer.overlays        // array of all overlay layers
 up.layer.get(0)          // layer by index (0 = root)
+up.layer.get('front')    // by reference string
 
 // Iterate layers
 for (let layer of up.layer.stack) { }
 
 // Check if a layer is open
 up.layer.isOverlay()     // true if current is not root
+up.layer.isRoot()        // true if current is root
+up.layer.isFront()       // true if current is topmost
+
+// Dismiss all overlays at once
+up.layer.dismissOverlays()
+
+// Append element to current layer
+up.layer.affix('.flash', { text: 'Hello' })
+
+// Containment check
+up.layer.contains(element)
 
 // Targeting
 up.render({ url: '/menu', layer: 'root' })
+```
+
+**Config:**
+```js
+up.layer.config.mode = 'modal'          // default overlay mode
+up.layer.config.foreignOverlaySelectors = ['dialog']  // non-Unpoly overlays to ignore
+
+// Per-mode visual config (all inherit from config.overlay):
+up.layer.config.overlay.openAnimation    // default open animation
+up.layer.config.overlay.closeAnimation   // default close animation
+up.layer.config.overlay.history          // whether overlay updates history
+up.layer.config.overlay.trapFocus        // trap keyboard focus in overlay
+up.layer.config.modal.backdrop = true    // modal has a backdrop
+up.layer.config.modal.size = 'medium'    // overlay size: 'small', 'medium', 'large', 'grow', 'full'
+up.layer.config.drawer.position = 'left' // drawer position: 'left' or 'right'
+up.layer.config.popup.align = 'left'     // popup alignment: 'left' or 'right'
+up.layer.config.popup.trapFocus = false  // popups don't trap focus by default
 ```
 
 ---
