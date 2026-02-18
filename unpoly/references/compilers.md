@@ -325,8 +325,8 @@ function lockCapybaraForObservedChanges(formOrField, options = {}) {
 
 // Register for every field that uses Unpoly's async form attributes
 if (window.CapybaraLockstep) {
-  up.compiler('[up-observe]', (el) =>
-    lockCapybaraForObservedChanges(el, { taskName: `[up-observe]: ${el}` }))
+  up.compiler('[up-watch]', (el) =>
+    lockCapybaraForObservedChanges(el, { taskName: `[up-watch]: ${el}` }))
 
   up.compiler('[up-autosubmit]', (el) =>
     lockCapybaraForObservedChanges(el, { taskName: `[up-autosubmit]: ${el}` }))
