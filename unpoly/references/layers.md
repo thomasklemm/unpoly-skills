@@ -233,7 +233,8 @@ def create
 end
 ```
 
-The `value` in `[up-on-accepted]` is the hash passed to `up.layer.emit` (here `{ id: 42 }`).
+The `value` in `[up-on-accepted]` is the emitted DOM event object — the keyword args passed to
+`up.layer.emit` are merged as event properties, so `value.id` returns `42`.
 
 **Event-based dismissal:**
 ```html

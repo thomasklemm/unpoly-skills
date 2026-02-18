@@ -515,7 +515,8 @@ Opener (parent form):
   })" %>
 ```
 
-`value` in `[up-on-accepted]` is the hash passed to `up.layer.emit` — here `{ id: 42 }`.
+`value` in `[up-on-accepted]` is the emitted DOM event object — the keyword args passed to
+`up.layer.emit` are merged as event properties, so `value.id` returns `42`.
 `up.validate` re-submits the form with the new `patient_id` so the server-rendered form
 reflects the newly associated record.
 
