@@ -130,11 +130,24 @@ Load a fragment only when needed, not on initial page render:
 
 **Load immediately when page loads (deferred from initial render):**
 ```html
-<div up-defer="/expensive-stats">
+<div id="stats" up-defer="/expensive-stats">
   <!-- Shown while loading -->
   <p class="placeholder">Loading…</p>
 </div>
 ```
+
+> **Gotcha:** The placeholder **must have a derivable target selector** — typically an `[id]`.
+> Unpoly targets itself by default, sending `X-Up-Target: #stats`. The server must respond
+> with an element using the **same id** as a wrapper:
+>
+> ```html
+> <!-- Server response must wrap content in the matching id -->
+> <div id="stats">
+>   …actual content…
+> </div>
+> ```
+>
+> If the ids don't match, Unpoly cannot find the fragment to replace.
 
 **Load when element scrolls into view:**
 ```html
