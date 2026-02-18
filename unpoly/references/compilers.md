@@ -298,3 +298,43 @@ For gradual migration, configure which selectors Unpoly should handle:
 // Opt into Unpoly for specific links only
 up.link.config.followSelectors = ['a[up-follow]', 'a.ajax-link']
 ```
+
+---
+
+## CapybaraLockstep integration (system tests)
+
+When using [CapybaraLockstep](https://github.com/makandra/capybara-lockstep) for reliable
+system tests, register compilers that lock the test runner while Unpoly async operations
+(watch, autosubmit, validate) are in flight:
+
+```js
+// Lock capybara for the duration of the watch delay + server round-trip
+function lockCapybaraForObservedChanges(formOrField, options = {}) {
+  if (!window.CapybaraLockstep) return
+
+  const taskName = options.taskName || `observed changes in ${formOrField}`
+  const delay = options.delay
+    || formOrField.getAttribute('up-watch-delay')
+    || up.form.config.watchInputDelay
+
+  return up.on(formOrField, 'input change', () => {
+    window.CapybaraLockstep.startWork(taskName)
+    setTimeout(() => window.CapybaraLockstep.stopWork(taskName), delay)
+  })
+}
+
+// Register for every field that uses Unpoly's async form attributes
+if (window.CapybaraLockstep) {
+  up.compiler('[up-observe]', (el) =>
+    lockCapybaraForObservedChanges(el, { taskName: `[up-observe]: ${el}` }))
+
+  up.compiler('[up-autosubmit]', (el) =>
+    lockCapybaraForObservedChanges(el, { taskName: `[up-autosubmit]: ${el}` }))
+
+  up.compiler('[up-validate]', (el) =>
+    lockCapybaraForObservedChanges(el, { taskName: `[up-validate]: ${el}` }))
+}
+```
+
+The compiler returns the `up.on` unbind function as its destructor, so the listener is
+automatically removed when the element is removed from the DOM.
