@@ -312,10 +312,11 @@ system tests, register compilers that lock the test runner while Unpoly async op
 function lockCapybaraForObservedChanges(formOrField, options = {}) {
   if (!window.CapybaraLockstep) return
 
-  const taskName = options.taskName || `observed changes in ${formOrField}`
+  const taskName = options.taskName ?? `observed changes in ${formOrField}`
   const delay = options.delay
-    || formOrField.getAttribute('up-watch-delay')
-    || up.form.config.watchInputDelay
+    ?? formOrField.getAttribute('up-watch-delay')
+    ?? up.form.config.watchInputDelay
+    ?? 0
 
   return up.on(formOrField, 'input change', () => {
     window.CapybaraLockstep.startWork(taskName)
