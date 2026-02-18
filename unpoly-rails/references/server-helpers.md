@@ -35,6 +35,18 @@ up.fail_target?('.errors') # Is this selector targeted on failure?
 up.any_target?('.flash')   # Targeted for success OR failure?
 ```
 
+> **Gotcha:** `up.target?` always returns `true` for non-Unpoly requests (regular page loads,
+> tests). This is by design — a full-page request is assumed to include any fragment.
+> Always guard with `up?` first when the check should only apply to fragment updates:
+>
+> ```ruby
+> # Wrong — always true for regular requests, breaks tests
+> if up.target?('#sidebar')
+>
+> # Correct
+> if up? && up.target?('#sidebar')
+> ```
+
 ---
 
 ## Changing the render target
