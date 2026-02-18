@@ -147,6 +147,60 @@ In Rails/ERB you can select the preview dynamically:
 <%= form_for task, html: { 'up-preview': preview } do |form| %>
 ```
 
+**Pattern: button spinner that preserves layout dimensions**
+
+When swapping button text for a spinner, lock the button's size first with `preview.setStyle()`
+to prevent layout shift:
+
+```js
+up.preview('btn-spinner', function(preview) {
+  let button = preview.origin.matches('.btn')
+    ? preview.origin
+    : preview.origin.closest('form')?.querySelector('button[type=submit]')
+
+  if (!button) return
+
+  // Lock dimensions so the layout doesn't shift when content is replaced
+  preview.setStyle(button, {
+    height: button.offsetHeight + 'px',
+    width: button.offsetWidth + 'px'
+  })
+  preview.swapContent(button, '<span class="spinner"></span>')
+})
+```
+
+**Pattern: dim and greyscale content behind a loading spinner using CSS `:has()`**
+
+Insert a spinner at the top of the main area; CSS `:has()` automatically dims everything else:
+
+```js
+up.preview('main-spinner', function(preview) {
+  // Find the :main ancestor of the fragment being updated
+  let main = up.fragment.closest(preview.fragment, ':main')
+  preview.insert(main, 'afterbegin', '<div class="main-spinner"></div>')
+})
+```
+
+```css
+.main-spinner {
+  /* your spinner styles */
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Dim siblings via :has() — no JS needed */
+main:has(.main-spinner) {
+  position: relative;
+}
+main:has(.main-spinner) > *:not(.main-spinner) {
+  transition: opacity 0.3s ease-out, filter 0.3s ease-out;
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+```
+
+The spinner and all style changes are reverted automatically when the response arrives.
+
 ---
 
 ## Optimistic rendering
