@@ -90,6 +90,20 @@ When one target is an ancestor of another, only the ancestor is requested.
 ```
 Common for notification badges, nav bars, flash messages that live outside the targeted fragment.
 
+By default, `[up-hungry]` only fires when the element's own layer is targeted. Use
+`[up-if-layer="any"]` to update the element even when requests target a different layer
+(e.g. an overlay):
+
+```html
+<!-- Update server-code links even when an overlay handles the response -->
+<div class="debug-bar" up-hungry up-if-layer="any">
+  <a href="...">Controller</a> / <a href="...">View</a>
+</div>
+```
+
+This is useful for debugging panels, analytics banners, or any element that should always
+reflect the most recent server action regardless of which layer was targeted.
+
 ---
 
 ## Keeping elements across updates
@@ -151,6 +165,46 @@ From JS:
 ```js
 up.render({ target: '.content', fragment: '#my-template' })
 ```
+
+**Custom template engines via `up:template:clone`**
+
+Intercept `up.template.clone()` to implement your own template syntax. Register a listener
+on a custom `type` attribute to handle only your template elements:
+
+```html
+<!-- Use a non-standard type so the browser doesn't execute it -->
+<script id="task-row" type="text/minimustache">
+  <div class="task">
+    <span class="task-text">{{text}}</span>
+  </div>
+</script>
+```
+
+```js
+// Handle up.template.clone() calls for [type="text/minimustache"] elements
+up.on('up:template:clone', '[type="text/minimustache"]', function(event) {
+  let filled = event.target.innerHTML.replace(
+    /\{\{(\w+)\}\}/g,
+    (_match, variable) => up.util.escapeHTML(event.data[variable] ?? '')
+  )
+  event.nodes = up.element.createNodesFromHTML(filled)
+})
+```
+
+Use from a preview to optimistically insert new rows:
+
+```js
+up.preview('add-task', function(preview) {
+  let text = preview.params.get('task[text]')
+  let taskList = preview.fragment.querySelector('.task-list')
+  let newRow = up.template.clone('#task-row', { text })
+  preview.insert(taskList, 'beforeend', newRow)
+})
+```
+
+The cloned node is inserted into the DOM immediately as an optimistic preview, then replaced
+by the real server response when it arrives. `up.util.escapeHTML` prevents XSS when rendering
+user-supplied values into templates.
 
 ---
 

@@ -269,6 +269,23 @@ Configure globally:
 up.link.config.instantSelectors.push('a[href]')
 ```
 
+**Combine instant + preload for maximum perceived speed:**
+
+Stack both optimizations: follow on mousedown (instant) and pre-fetch on hover (preload).
+Use `.unshift()` to ensure the selector takes priority over any built-in exclusions:
+
+```js
+// Follow all links on mousedown (no click delay)
+up.link.config.instantSelectors.unshift('a[href]')
+
+// Pre-fetch all links on hover so the response is ready before mousedown
+up.link.config.preloadSelectors.unshift('a[href]')
+```
+
+With both set, hovering a link starts the request; the mousedown fires the navigation; by the
+time the user lifts the mouse, the response is often already in the cache. The result is
+navigation that feels near-instant even on modest connections.
+
 ---
 
 ## Restoring history

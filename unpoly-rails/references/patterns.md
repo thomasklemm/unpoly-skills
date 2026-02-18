@@ -1,9 +1,87 @@
 # Unpoly Rails: Common Patterns
 
 ## Table of contents
+- [Standard controller save pattern](#standard-controller-save-pattern)
 - [Event-driven subinteractions](#event-driven-subinteractions)
 - [Authorization: overlay vs root layer](#authorization-overlay-vs-root-layer)
 - [Drawer overlay links](#drawer-overlay-links)
+
+---
+
+## Standard controller save pattern
+
+A clean, consistent controller structure for Unpoly-powered CRUD actions. The key is
+handling the `up.validate?` branch (server-side validation without saving) separately from
+the actual save, keeping each branch's intent clear.
+
+```ruby
+# app/controllers/companies_controller.rb
+class CompaniesController < ApplicationController
+  def new
+    build_company
+  end
+
+  def create
+    build_company
+    save_company(form: :new)
+  end
+
+  def edit
+    load_company
+    build_company
+  end
+
+  def update
+    load_company
+    build_company
+    save_company(form: :edit)
+  end
+
+  def destroy
+    load_company
+    if @company.destroy
+      up.layer.emit('company:destroyed')   # close any overlay watching for this event
+      redirect_to companies_path, notice: 'Company deleted.'
+    else
+      redirect_to @company, alert: 'Could not delete company.'
+    end
+  end
+
+  private
+
+  def load_company
+    @company = current_tenant.companies.find(params[:id])
+  end
+
+  def build_company
+    @company ||= current_tenant.companies.new
+    @company.assign_attributes(company_params) if params[:company]
+  end
+
+  def save_company(form:)
+    if up.validate?
+      @company.valid?          # run validations without saving (populates error messages)
+      render form              # re-render form; Unpoly replaces only the changed form group
+    elsif @company.save
+      redirect_to @company, notice: 'Company saved.'
+    else
+      render form, status: :unprocessable_entity
+    end
+  end
+
+  def company_params
+    params.require(:company).permit(:name, :address)
+  end
+end
+```
+
+Key points:
+- `build_*` methods initialize/assign params; `load_*` methods find by id; `save_*` handles
+  the Unpoly validation branch separately from the real save
+- `up.validate?` returns `true` when Unpoly sends `X-Up-Validate` (field blur, no save intended)
+- Call `record.valid?` before re-rendering so ActiveRecord populates `record.errors`
+- Emit a layer event after destructive actions so opener overlays can auto-close via
+  `[up-dismiss-event]`
 
 ---
 
