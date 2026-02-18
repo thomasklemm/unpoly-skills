@@ -326,12 +326,25 @@ up-progress-bar {
 
 **Configure:**
 ```js
-up.network.config.badResponseTime = 400  // ms before showing (default 400)
+up.network.config.lateTime = 400  // ms before showing progress bar (default 400)
 ```
 
 **Disable:**
 ```js
 up.network.config.progressBar = false
+```
+
+**Tip: Increase `lateTime` when all interactions have immediate preview feedback**
+
+When every link and form already shows an immediate spinner or optimistic update via
+`[up-preview]`, the global progress bar is redundant for normal connections and only
+needed as a last-resort indicator for very slow responses. Raising `lateTime` avoids
+the progress bar flickering for fast-but-not-instant responses:
+
+```js
+// Only show the progress bar for responses taking more than 1.25 seconds.
+// Previews/spinners already give immediate feedback for normal latency.
+up.network.config.lateTime = 1250
 ```
 
 ---
