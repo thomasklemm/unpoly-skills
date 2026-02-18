@@ -90,6 +90,20 @@ When one target is an ancestor of another, only the ancestor is requested.
 ```
 Common for notification badges, nav bars, flash messages that live outside the targeted fragment.
 
+By default, `[up-hungry]` only fires when the element's own layer is targeted. Use
+`[up-if-layer="any"]` to update the element even when requests target a different layer
+(e.g. an overlay):
+
+```html
+<!-- Update server-code links even when an overlay handles the response -->
+<div class="debug-bar" up-hungry up-if-layer="any">
+  <a href="...">Controller</a> / <a href="...">View</a>
+</div>
+```
+
+This is useful for debugging panels, analytics banners, or any element that should always
+reflect the most recent server action regardless of which layer was targeted.
+
 ---
 
 ## Keeping elements across updates
