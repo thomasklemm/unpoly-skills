@@ -493,7 +493,7 @@ def create
   @patient = Patient.new(patient_params)
   if up.validate?
     @patient.valid?
-    render :new
+    render :new, status: :unprocessable_entity
   elsif @patient.save
     # Emit event so any overlay listening with [up-accept-event] closes with this payload
     up.layer.emit('patient:created', id: @patient.id)
