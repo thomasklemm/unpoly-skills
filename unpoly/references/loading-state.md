@@ -115,9 +115,9 @@ up.preview('my-preview', function(preview) {
   preview.origin                 // element that triggered the update
 
   // All changes are reverted automatically:
-  preview.addClass(element, 'loading')      // was: addClassTemporarily (removed in 3.12)
-  preview.removeClass(element, 'loaded')   // was: removeClassTemporarily (removed in 3.12)
-  preview.setStyle(element, { opacity: 0.5 })  // was: setStyleTemporarily (removed in 3.12)
+  preview.addClass(element, 'loading')
+  preview.removeClass(element, 'loaded')
+  preview.setStyle(element, { opacity: 0.5 })
   preview.insert(element, 'beforeend', '<p>Loading…</p>')
   preview.disable(formElement)
   preview.showPlaceholder(element, '<div class="skeleton">…</div>')
