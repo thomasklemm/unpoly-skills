@@ -95,6 +95,9 @@ Add `[up-validate]` at the form level to validate all fields on blur, or per-fie
 <% end %>
 ```
 
+> Don't put `[up-validate]` on both the form *and* individual fields — each blur will fire
+> two validation requests (one from the field, one from the form). Pick one level.
+
 ### Boolean attributes
 
 Rails renders `'up-follow': true` as `up-follow="up-follow"`, which Unpoly accepts as truthy.
