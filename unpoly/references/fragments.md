@@ -166,6 +166,45 @@ From JS:
 up.render({ target: '.content', fragment: '#my-template' })
 ```
 
+**Custom template engines via `up:template:clone`**
+
+Intercept `up.template.clone()` to implement your own template syntax. Register a listener
+on a custom `type` attribute to handle only your template elements:
+
+```html
+<!-- Use a non-standard type so the browser doesn't execute it -->
+<script id="task-row" type="text/minimustache">
+  <div class="task">
+    <span class="task-text">{{text}}</span>
+  </div>
+</script>
+```
+
+```js
+// Handle up.template.clone() calls for [type="text/minimustache"] elements
+up.on('up:template:clone', '[type="text/minimustache"]', function(event) {
+  let filled = event.target.innerHTML.replace(
+    /\{\{(\w+)\}\}/g,
+    (_match, variable) => up.util.escapeHTML(event.data[variable] ?? '')
+  )
+  event.nodes = up.element.createNodesFromHTML(filled)
+})
+```
+
+Use from a preview to optimistically insert new rows:
+
+```js
+up.preview('add-task', function(preview) {
+  let text = preview.params.get('task[text]')
+  let newRow = up.template.clone('#task-row', { text })
+  preview.insert(someContainer, 'beforeend', newRow)
+})
+```
+
+The cloned node is inserted into the DOM immediately as an optimistic preview, then replaced
+by the real server response when it arrives. `up.util.escapeHTML` prevents XSS when rendering
+user-supplied values into templates.
+
 ---
 
 ## Handling all links and forms
