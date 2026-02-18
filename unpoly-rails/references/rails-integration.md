@@ -6,6 +6,7 @@
 - [Turbo coexistence](#turbo-coexistence)
 - [CSP setup](#csp-setup)
 - [Global follow-all config](#global-follow-all-config)
+
 ---
 
 ## View helper syntax
@@ -263,5 +264,3 @@ Also add preloading and instant-follow globally for snappier navigation:
 up.link.config.preloadSelectors.push('a[href]')
 up.link.config.instantSelectors.push('a[href]')
 ```
-
-
