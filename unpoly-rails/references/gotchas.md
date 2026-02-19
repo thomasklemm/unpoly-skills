@@ -57,6 +57,13 @@ shown above is the reliable way to close the overlay after a successful save.
 
 ## up-hungry flash wiped by up-defer responses
 
+> **Using `[up-flashes]`?** Unpoly 3.x's built-in `[up-flashes]` attribute automatically
+> applies `up-keep` alongside `up-hungry`. When a subsequent `[up-defer]` response arrives
+> with an empty `[up-flashes]`, `up-keep` causes Unpoly to preserve the existing flash
+> container — including the displayed toast — rather than replace it. Apps using
+> `[up-flashes]` are not affected by this gotcha. The pattern below applies to apps that
+> manage their flash container with a plain `[up-hungry]` element.
+
 When a page triggers multiple Unpoly requests in sequence (e.g. a modal creates a record,
 which causes both a detail fragment update and a lazy `[up-defer]` panel to reload), the
 flash is consumed by the first response. Subsequent `[up-defer]` responses have no flash,
@@ -105,9 +112,11 @@ This drains any pending validation before the form submission begins:
 def settle_form
   page.execute_script("document.activeElement.blur()")
   sleep 0.05  # give Unpoly a tick to queue the request
-  loop do
-    break unless page.evaluate_script("typeof up !== 'undefined' && up.network.isBusy()")
-    sleep 0.05
+  Timeout.timeout(5) do
+    loop do
+      break unless page.evaluate_script("typeof up !== 'undefined' && up.network.isBusy()")
+      sleep 0.05
+    end
   end
 end
 
