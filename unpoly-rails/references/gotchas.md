@@ -5,7 +5,7 @@ Real-world pitfalls encountered when building Rails apps with Unpoly.
 ## Table of contents
 - [up-accept-location must not match the opening URL](#up-accept-location-must-not-match-the-opening-url)
 - [up-hungry flash wiped by up-defer responses](#up-hungry-flash-wiped-by-up-defer-responses)
-- [up-validate + up-defer system test submit race](#up-validate--up-defer-system-test-submit-race)
+- [up-validate system test submit race](#up-validate-system-test-submit-race)
 
 ---
 
@@ -45,19 +45,13 @@ def create
 end
 ```
 
-**Fix option 2 — use a specific path helper with `$id` wildcard:**
+Client-side URL patterns like `/contacts/*`, `/companies/*` or `/companies/$id`
+(or `/companies/:id`) cannot distinguish between `/companies/new` and `/companies/123`:
+they will match both the opening URL and the post-save URL and can still cause the
+immediate-close bug described above. For this reason the server-side accept pattern
+shown above is the reliable way to close the overlay after a successful save.
 
-`company_path('$id')` generates `/companies/$id`. Unpoly treats `$id` as a wildcard but
-this won't match `/companies/new` since `new` doesn't look like a numeric ID:
-
-```erb
-<%= link_to 'New company', new_company_path,
-  'up-layer': 'new',
-  'up-accept-location': company_path('$id'),
-  'up-on-accepted': "up.reload('#companies')" %>
-```
-
-> Always verify that a glob pattern doesn't match the overlay's opening URL.
+> Always verify that a URL pattern doesn't match the overlay's opening URL.
 
 ---
 
@@ -92,7 +86,7 @@ so `[up-hungry]` stays wired for the next real flash message:
 
 ---
 
-## up-validate + up-defer system test submit race
+## up-validate system test submit race
 
 In Capybara system tests, clicking the submit button blurs the last focused field. If that
 field has `[up-validate]`, this fires a validation request *concurrently* with the form
