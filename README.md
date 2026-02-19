@@ -13,7 +13,10 @@ Two skills, install either or both:
 Works with Claude Code, Cursor, OpenAI Codex, OpenCode, Amp, and [35+ more agents](https://github.com/vercel-labs/skills#supported-agents).
 
 ```bash
-# Install — the wizard will ask which skills you want
+# Install both skills at once
+npx skills add thomasklemm/unpoly-skills --skill unpoly --skill unpoly-rails
+
+# Or run without --skill and the wizard will ask which ones to install
 npx skills add thomasklemm/unpoly-skills
 ```
 
